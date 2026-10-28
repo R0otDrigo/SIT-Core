@@ -1,0 +1,31 @@
+# Credenciales de Firebase (cada integrante tiene su copia local)
+config.ini
+
+# Compilacion
+/build*/
+/.qtcreator
+/3rdparty
+CMakeLists.txt.user*
+*.o
+*.obj
+*.a
+*.so
+*.so.*
+*.exe
+*.dll
+*.qm
+moc_*.cpp
+ui_*.h
+qrc_*.cpp
+
+# Editores / sistema
+*~
+*.autosave
+.*.swp
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Herramientas locales
+.claude/
