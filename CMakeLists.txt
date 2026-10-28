@@ -5,17 +5,20 @@ project(TecnologiaObjetos VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 6.2 COMPONENTS Quick REQUIRED)
+find_package(Qt6 6.2 COMPONENTS Quick Widgets REQUIRED)
 
 qt_add_executable(appTecnologiaObjetos
     main.cpp
+    mainwindow.ui
 )
 
 qt_add_qml_module(appTecnologiaObjetos
     URI TecnologiaObjetos
     VERSION 1.0
-    QML_FILES main.qml 
+    QML_FILES
+      main.qml
 )
+
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
@@ -29,7 +32,7 @@ set_target_properties(appTecnologiaObjetos PROPERTIES
 )
 
 target_link_libraries(appTecnologiaObjetos
-    PRIVATE Qt6::Quick)
+    PRIVATE Qt6::Quick Qt6::Widgets)
 
 include(GNUInstallDirs)
 install(TARGETS appTecnologiaObjetos
