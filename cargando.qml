@@ -5,24 +5,17 @@ Rectangle {
     anchors.fill: parent
     color: "#f90f0f"
     border.color: "black"
-    states: [
-      State {
-        name: "Ola"
-        PropertyChanges {
-          target: loading
-          x: middleRightRect.x
-          y: middleRightRect.y
-        }
-      },
-      State {
-        name: "Adios"
-      }
-    ]
+
     Connections {
-        target: mouseArea
-        function onClicked()
-        {
+        target: parent
+        function onClicked() {
             loading.state = "Adios"
         }
     }
+
+    states: [
+        State {
+            name: "Adios"
+        }
+    ]
 }
