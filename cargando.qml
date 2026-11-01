@@ -1,27 +1,28 @@
 import QtQuick
 
 Rectangle {
-    id: loading 
+    id: loading
     anchors.fill: parent
     color: "#f90f0f"
     border.color: "black"
     states: [
-      State: [
+      State {
         name: "Ola"
-        ProperlyChanges {
+        PropertyChanges {
           target: loading
           x: middleRightRect.x
           y: middleRightRect.y
         }
-      ]
-      State: [
+      },
+      State {
         name: "Adios"
-      ]
+      }
     ]
     Connections {
         target: mouseArea
         function onClicked()
         {
-            loading.state = "State1"
+            loading.state = "Adios"
         }
+    }
 }
