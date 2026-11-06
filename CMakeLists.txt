@@ -31,6 +31,14 @@ qt_add_qml_module(appTecnologiaObjetos
       cargando.qml
 )
 
+# Adding a config.ini to firebaseauthmanager
+
+
+add_custom_command(TARGET appTecnologiaObjetos POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_CURRENT_SOURCE_DIR}/config.ini"
+        "$<TARGET_FILE_DIR:appTecnologiaObjetos>/config.ini")
+
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
