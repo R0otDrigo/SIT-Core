@@ -21,6 +21,9 @@ qt_add_executable(appTecnologiaObjetos
     userdashboard.cpp
     guestdashboard.h
     guestdashboard.cpp
+    login.h
+    login.cpp
+    login.ui
 )
 
 qt_add_qml_module(appTecnologiaObjetos

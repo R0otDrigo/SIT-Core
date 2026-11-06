@@ -1,14 +1,16 @@
+#include <QQmlApplicationEngine>
 #include <QApplication>
-#include "logindialog.h"
+#include "login.h"
 #include "admindashboard.h"
 #include "userdashboard.h"
 #include "guestdashboard.h"
 #include <QSettings>
 
+
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
 
-    LoginDialog loginDialog;
+    Login loginDialog;
     // Configure Firebase - replace with your actual values
     const QString configPath = QCoreApplication::applicationDirPath() + "/config.ini";
     QSettings settings(configPath, QSettings::IniFormat);
@@ -18,7 +20,8 @@ int main(int argc, char *argv[]) {
     QString PROJECT_ID = settings.value("FIREBASE_PROJECT_ID").toString();
     loginDialog.setFirebaseConfig(API_KEY, PROJECT_ID);
     
-    QObject::connect(&loginDialog, &LoginDialog::loginSuccessful, [&](const QString &role) {
+    QObject::connect(&loginDialog, &Login::loginSuccessful, [&](const QString &role) {
+        loginDialog.hide();
         if (role.toLower() == "admin" || role.toLower() == "administrator") {
             AdminDashboard *adminDash = new AdminDashboard();
             adminDash->show();
@@ -34,10 +37,7 @@ int main(int argc, char *argv[]) {
             userDash->show();
         }
     });
-    
-    if (loginDialog.exec() == QDialog::Accepted) {
-        return a.exec();
-    }
-    
-    return 0;
+
+    loginDialog.show();
+    return a.exec();
 }
