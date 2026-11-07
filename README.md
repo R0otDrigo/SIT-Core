@@ -1,33 +1,33 @@
-# Avances:
+# 🚚 SIT-Core
 
+Sistema de gestión y monitoreo de flotas.
 
-1) Se puede hacer login hacia una base de datos 'Firebase'
-2) Los usuarios tienen 'dashboards' diferentes cada uno.
-3) Login sencillo de usuarios.
+## 🚀 Avances Actuales
 
+- [x] Conexión y autenticación (Login) con base de datos en **Firebase**.
+- [x] Renderizado de **dashboards personalizados** dependiendo del tipo de usuario.
+- [x] Interfaz de login sencillo de usuarios finalizada.
 
-# Mejoras:
+## 🎨 Mejoras Visuales (UI/UX)
 
-1) Animaciónes de 'Loading ...' para cada registro.
-2) Escoger una paleta de colores del tema de la flota
-3) Logos y assets, puede ir despues, pero no al final.
+- [ ] Implementar animaciones de estado (*Loading...*) para cada registro y transición.
+- [ ] Definir e implementar una paleta de colores institucional acorde al tema de la flota.
+- [ ] Diseñar e integrar logos y assets gráficos (Prioridad media: implementar antes de la fase final).
 
+## 📋 Tareas Pendientes y Gestión de Roles
 
-# Pendientes:
+### 1. Refactorización de Usuarios Actuales
+Hacer el Dashboard completo de cada tipo de usuario y actualizar la nomenclatura:
+- [ ] **`fleet_manager`** (Reemplaza al antiguo `administrador`): Desarrollo del dashboard de administración central.
+- [ ] **`user`** (Conductores/Afiliados): Dashboard simplificado enfocado en estadísticas de recorrido de sus unidades.
+- [ ] **`guess`** (Invitado): *⚠️ IMPORTANTE: Mantener solo para pruebas de funcionalidad del fleet_manager. ELIMINAR en el pase a producción.*
 
-1) Hacer el 'Dashboard' completo de cada tipo de usuario: y cambiar el nombre de los usuarios.
+### 2. Nuevos Roles por Añadir
+- [ ] **`jefe_de_trafico`**: Encargado de tareas de supervisión y delegación de tareas. *(Nota: En fase de pruebas se evaluará automatizar esto mediante un RPA o IA).*
+- [ ] **`responsable_de_desplazamientos`**: Encargado de velar por los horarios y la correcta asignación de recursos.
 
-administrador -> Renombrar a 'fleet_manager'
-guess -> ELIMINARLO EN PRODUCCION (Fase final) -> usenlo como pruebas para implementar funcionalidad de el 'fleet_manager' y otros
-user -> Son usuarios afiliados a la empresa, son los mismos conductores de unidades de la flota, simple dashboard con sus estadisticas de recorrido.
-
-USUARIOS POR AÑADIR:
-
-jefe_de_trafico -> Tarea de supervición y delegación de tareas, puede ser automatizado por un RPA o un AI en fase de pruebas.
-
-responsable_de_desplazamientos -> Lo mismo, vela por los horarios, y asigna recursos.
-
-
+---
+*Documentación actualizada para el equipo de desarrollo.*
 
 
 
