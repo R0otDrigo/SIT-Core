@@ -1,0 +1,5 @@
+foreach(t test_vehicle test_stop_repository)
+  add_executable(${t} ${t}.cpp)
+  target_link_libraries(${t} PRIVATE sit_model)
+  add_test(NAME ${t} COMMAND ${t})
+endforeach()

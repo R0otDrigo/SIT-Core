@@ -1,34 +1,33 @@
-# 🚚 SIT-Core
+# SIT-Core
 
-Sistema de gestión y monitoreo de flotas.
+Simulador y gestor en tiempo real de una red de transporte publico urbano (rutas troncales y
+alimentadoras de Arequipa). Proyecto final de Tecnologia de Objetos, UNSA 2026.
 
-## 🚀 Avances Actuales
+## Stack
+C++17, Qt 6 (Widgets), CMake >= 3.16, Git.
 
-- [x] Conexión y autenticación (Login) con base de datos en **Firebase**.
-- [x] Renderizado de **dashboards personalizados** dependiendo del tipo de usuario.
-- [x] Interfaz de login sencillo de usuarios finalizada.
+## Compilar
+```bash
+cmake -S . -B build
+cmake --build build
+ctest --test-dir build --output-on-failure
+```
+Si Qt6 no esta instalado, se compilan solo el modelo y los tests.
 
-## 🎨 Mejoras Visuales (UI/UX)
+## Arquitectura (MVC)
+- `src/model/`      Modelo: C++ puro, sin Qt.
+- `src/controller/` Controladores (simulacion, despacho).
+- `src/view/`       Vistas Qt.
+- `src/common/`     Utilidades: Position, excepciones, Repository<T>.
+- `tests/`          Pruebas unitarias.
 
-- [ ] Implementar animaciones de estado (*Loading...*) para cada registro y transición.
-- [ ] Definir e implementar una paleta de colores institucional acorde al tema de la flota.
-- [ ] Diseñar e integrar logos y assets gráficos (Prioridad media: implementar antes de la fase final).
+## Patrones
+Factory Method (VehicleFactory), Adapter (fuentes de rutas), Strategy (despacho), Observer.
 
-## 📋 Tareas Pendientes y Gestión de Roles
+## Flujo de trabajo Git
+- `main` siempre compila. Ramas `feature/<nombre>`, se integra por Pull Request con 1 revision.
+- Commits en imperativo: `feat: agrega ...`, `fix: ...`, `test: ...`, `docs: ...`.
 
-### 1. Refactorización de Usuarios Actuales
-Hacer el Dashboard completo de cada tipo de usuario y actualizar la nomenclatura:
-- [ ] **`fleet_manager`** (Reemplaza al antiguo `administrador`): Desarrollo del dashboard de administración central.
-- [ ] **`user`** (Conductores/Afiliados): Dashboard simplificado enfocado en estadísticas de recorrido de sus unidades.
-- [ ] **`guess`** (Invitado): *⚠️ IMPORTANTE: Mantener solo para pruebas de funcionalidad del fleet_manager. ELIMINAR en el pase a producción.*
-
-### 2. Nuevos Roles por Añadir
-- [ ] **`jefe_de_trafico`**: Encargado de tareas de supervisión y delegación de tareas. *(Nota: En fase de pruebas se evaluará automatizar esto mediante un RPA o IA).*
-- [ ] **`responsable_de_desplazamientos`**: Encargado de velar por los horarios y la correcta asignación de recursos.
-
----
-*Documentación actualizada para el equipo de desarrollo.*
-
-
-
-
+## Integrantes
+Retamozo Calatayud Angel Julio, Castillo Lazo Rodrigo Zara, Estefanero Palma Rodrigo,
+Mamani Quispe Renzo Geomar, Camani Chambi Ronald Rodrigo, Sarmiento Tico Limberg.
