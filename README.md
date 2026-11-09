@@ -29,5 +29,5 @@ Factory Method (VehicleFactory), Adapter (fuentes de rutas), Strategy (despacho)
 - Commits en imperativo: `feat: agrega ...`, `fix: ...`, `test: ...`, `docs: ...`.
 
 ## Integrantes
-Retamozo Calatayud Angel Julio, Castillo Lazo Rodrigo Zara, Estefanero Palma Rodrigo,
-Mamani Quispe Renzo Geomar, Camani Chambi Ronald Rodrigo, Sarmiento Tico Limberg.
+Retamozo Angel, Castillo  Rodrigo, Estefanero Rodrigo,
+Mamani Renzo, Camani Ronald, Sarmiento Limberg.
