@@ -1,8 +1,11 @@
 # This file is used to ignore files which are generated
 # ----------------------------------------------------------------------------
 
-Firebase file
+# Firebase file
 config.ini
+
+#SDK Firebase
+./3rdparty/*
 
 *~
 *.autosave

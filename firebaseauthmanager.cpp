@@ -27,6 +27,7 @@ void FirebaseAuthManager::signIn(const QString &email, const QString &password)
     }
 
     QNetworkRequest request(QUrl(QString("https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=%1").arg(m_apiKey)));
+    //   QNetworkRequest registrarse(QUrl(QString("https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=%1").arg(m_apiKey)));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
     QJsonObject json;
@@ -36,6 +37,52 @@ void FirebaseAuthManager::signIn(const QString &email, const QString &password)
 
     QNetworkReply *reply = m_networkManager->post(request, QJsonDocument(json).toJson());
     connect(reply, &QNetworkReply::finished, this, &FirebaseAuthManager::onSignInReplyFinished);
+}
+
+
+void FirebaseAuthManager::signUp(const QString &email, const QString &password)
+{
+    if (m_apiKey.isEmpty()) {
+        emit signUpFailed("Firebase API key not configured");  // ← signal propio
+        return;
+    }
+
+    QUrl url = QUrl("https://identitytoolkit.googleapis.com/v1/accounts:signUp");
+    QUrlQuery query;
+    query.addQueryItem("key", m_apiKey);
+    url.setQuery(query);
+
+    QNetworkRequest request(url);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QJsonObject json;
+    json["email"] = email;
+    json["password"] = password;
+    json["returnSecureToken"] = true;
+
+    QNetworkReply *reply = m_networkManager->post(request, QJsonDocument(json).toJson());
+    connect(reply, &QNetworkReply::finished, this, &FirebaseAuthManager::onSignUpReplyFinished);  // ← slot propio
+    reply->deleteLater();
+}
+
+void FirebaseAuthManager::onSignUpReplyFinished()
+{
+    QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
+    if (!reply) return;
+    reply->deleteLater();
+
+    if (reply->error() != QNetworkReply::NoError) {
+        QJsonObject err = QJsonDocument::fromJson(reply->readAll()).object().value("error").toObject();
+        emit signUpFailed(err.value("message").toString());
+        return;
+    }
+
+    QJsonObject data = QJsonDocument::fromJson(reply->readAll()).object();
+    QString m_idToken = data["idToken"].toString();
+    QString m_refreshToken = data["refreshToken"].toString();
+    QString m_uid = data["localId"].toString();
+
+    emit signUpSucceeded(m_uid);
 }
 
 void FirebaseAuthManager::onSignInReplyFinished()

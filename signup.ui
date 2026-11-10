@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SignUp</class>
+ <widget class="QWidget" name="SignUp">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QPushButton" name="pushButton">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>250</y>
+     <width>101</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Confirmar</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="formLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>6</x>
+     <y>50</y>
+     <width>381</width>
+     <height>191</height>
+    </rect>
+   </property>
+   <layout class="QFormLayout" name="formLayout">
+    <item row="0" column="0">
+     <widget class="QLabel" name="correoElectronicoLabel">
+      <property name="text">
+       <string>Correo Electronico</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLineEdit" name="correoElectronicoLineEdit"/>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="contraseALabel">
+      <property name="text">
+       <string>Contraseña</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLineEdit" name="contraseALineEdit"/>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="rolLabel">
+      <property name="text">
+       <string>Rol</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QComboBox" name="rolComboBox">
+      <item>
+       <property name="text">
+        <string>ADMIN</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>USER</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>GUESS</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

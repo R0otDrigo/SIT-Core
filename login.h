@@ -23,6 +23,7 @@ signals:
 
 private slots:
     void onLoginClicked();
+    void onSignUpClicked();
     void onSignInSuccess(const QString &localId, const QString &idToken, const QString &role);
     void onSignInFailed(const QString &error);
 

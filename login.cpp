@@ -1,3 +1,6 @@
+
+#include "signup.h"
+#include "ui_signup.h"
 #include "login.h"
 #include "ui_login.h"
 
@@ -9,6 +12,7 @@ Login::Login(QWidget *parent)
     ui->setupUi(this);
 
     connect(ui->loginButton, &QPushButton::clicked, this, &Login::onLoginClicked);
+    connect(ui->signUpButton, &QPushButton::clicked, this, &Login::onSignUpClicked);
     connect(m_authManager, &FirebaseAuthManager::signInSuccess, this, &Login::onSignInSuccess);
     connect(m_authManager, &FirebaseAuthManager::signInFailed, this, &Login::onSignInFailed);
 }
@@ -33,6 +37,16 @@ void Login::onLoginClicked()
     ui->info->setText("Logging in...");
     ui->loginButton->setEnabled(false);
     m_authManager->signIn(email, password);
+}
+
+void Login::onSignUpClicked(){
+    // Crear el objeto en el heap
+    SignUp *signDialog = new SignUp();
+
+    // Importante: decirle a Qt que elimine la memoria automáticamente al cerrar la ventana
+    signDialog->setAttribute(Qt::WA_DeleteOnClose);
+
+    signDialog->show();
 }
 
 void Login::onSignInSuccess(const QString &localId, const QString &idToken, const QString &role)

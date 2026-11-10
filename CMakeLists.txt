@@ -11,8 +11,8 @@ find_package(Qt6 6.2 COMPONENTS Quick Widgets Network REQUIRED)
 qt_add_executable(appTecnologiaObjetos
     main.cpp
     mainwindow.ui
-    logindialog.h
-    logindialog.cpp
+
+
     firebaseauthmanager.h
     firebaseauthmanager.cpp
     admindashboard.h
@@ -24,6 +24,9 @@ qt_add_executable(appTecnologiaObjetos
     login.h
     login.cpp
     login.ui
+    signup.h
+    signup.ui
+    signup.cpp
 )
 
 qt_add_qml_module(appTecnologiaObjetos
@@ -32,6 +35,8 @@ qt_add_qml_module(appTecnologiaObjetos
     QML_FILES
       main.qml
       cargando.qml
+SOURCES signup.h signup.cpp
+RESOURCES signup.ui
 )
 
 # Adding a config.ini to firebaseauthmanager
@@ -56,6 +61,15 @@ set_target_properties(appTecnologiaObjetos PROPERTIES
 
 target_link_libraries(appTecnologiaObjetos
     PRIVATE Qt6::Quick Qt6::Widgets Qt6::Network)
+
+#set(FIREBASE_CPP_SDK_DIR "${CMAKE_CURRENT_LIST_DIR}/3rdparty/firebase-cpp-sdk-14.1.0")
+#add_subdirectory(${FIREBASE_CPP_SDK_DIR} bin/ EXCLUDE_FROM_ALL)
+
+#target_link_libraries(${target_name} PRIVATE
+#    firebase_auth
+#    firebase_database
+#    firebase_app
+#)
 
 include(GNUInstallDirs)
 install(TARGETS appTecnologiaObjetos
