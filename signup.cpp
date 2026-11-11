@@ -2,6 +2,7 @@
 #include "ui_signup.h"
 
 #include <QCloseEvent>
+#include <QEvent>
 #include <iostream>
 #include "string"
 
@@ -43,6 +44,18 @@ void SignUp::closeEvent(QCloseEvent *event)
     emit closed();
 }
 
+void SignUp::changeEvent(QEvent *event)
+{
+    if (event->type() == QEvent::LanguageChange)
+        retranslate();
+    QWidget::changeEvent(event);
+}
+
+void SignUp::retranslate()
+{
+    ui->retranslateUi(this);
+}
+
 void SignUp::onSignUpClicked()
 {
     QString email = ui->correoElectronicoLineEdit->text().trimmed();
@@ -50,11 +63,11 @@ void SignUp::onSignUpClicked()
     QString role = ui->rolComboBox->currentText();
 
     if (email.isEmpty() || password.isEmpty()) {
-        ui->info->setText("Please enter email and password");
+        ui->info->setText(tr("Por favor, insertar correo y contraseña"));
         return;
     }
 
-    ui->info->setText("Register incoming...");
+    ui->info->setText(tr("Registrando..."));
     ui->confirmButton->setEnabled(false);
     m_authManager->signUp(email, password, role);
 }
@@ -62,7 +75,7 @@ void SignUp::onSignUpClicked()
 void SignUp::onSignUpSuccess()
 {
     ui->confirmButton->setEnabled(true);
-    ui->info->setText("Registro Completado");
+    ui->info->setText(tr("Registro Completado"));
 
     this->hide();
 

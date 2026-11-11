@@ -4,6 +4,7 @@
 #include "login.h"
 #include "ui_login.h"
 #include "QSettings"
+#include <QEvent>
 
 Login::Login(QWidget *parent)
     : QWidget(parent)
@@ -33,11 +34,11 @@ void Login::onLoginClicked()
     QString password = ui->contraseALineEdit->text();
 
     if (email.isEmpty() || password.isEmpty()) {
-        ui->info->setText("Please enter email and password");
+        ui->info->setText(tr("Por favor, insertar correo y contraseña"));
         return;
     }
 
-    ui->info->setText("Logging in...");
+    ui->info->setText(tr("Iniciando Sessión..."));
     ui->loginButton->setEnabled(false);
     m_authManager->signIn(email, password);
 }
@@ -85,6 +86,19 @@ void Login::onSignUpSuccess(){
     this->show();
 }
 
+void Login::reset(){
+
+}
+
+void Login::retranslate(){
+    ui->retranslateUi(this);
+}
+
+void Login::changeEvent(QEvent *event){
+    if (event->type() == QEvent::LanguageChange)
+        retranslate();
+    QWidget::changeEvent(event);
+}
 
 Login::~Login()
 {

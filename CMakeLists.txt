@@ -6,12 +6,11 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 6.2 COMPONENTS Quick Widgets Network REQUIRED)
+find_package(Qt6 6.2 COMPONENTS Quick Widgets LinguistTools Network REQUIRED)
+find_package(Qt6 REQUIRED COMPONENTS LinguistTools)
 
 qt_add_executable(appTecnologiaObjetos
     main.cpp
-    mainwindow.ui
-
 
     firebaseauthmanager.h
     firebaseauthmanager.cpp
@@ -27,6 +26,17 @@ qt_add_executable(appTecnologiaObjetos
     signup.h
     signup.ui
     signup.cpp
+    mainwindow.h
+    mainwindow.cpp
+    mainwindow.ui
+)
+
+qt_add_translations(appTecnologiaObjetos
+    TS_FILES
+        TecnologiaObjetos_es_ES.ts
+        TecnologiaObjetos_en_US.ts
+        TecnologiaObjetos_zh_CN.ts
+        TecnologiaObjetos_ar_SA.ts
 )
 
 qt_add_qml_module(appTecnologiaObjetos
@@ -35,8 +45,6 @@ qt_add_qml_module(appTecnologiaObjetos
     QML_FILES
       main.qml
       cargando.qml
-SOURCES signup.h signup.cpp
-RESOURCES signup.ui
 )
 
 # Adding a config.ini to firebaseauthmanager

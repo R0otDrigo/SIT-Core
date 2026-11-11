@@ -5,6 +5,7 @@
 #include "firebaseauthmanager.h"
 
 class QCloseEvent;
+class QEvent;
 
 namespace Ui {
 class SignUp;
@@ -20,11 +21,14 @@ public:
     explicit SignUp(QWidget *parent = nullptr);
     ~SignUp();
 
+    void retranslate();
+
 signals:
     void closed();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
+    void changeEvent(QEvent *event) override;
 
 private slots:
     void onSignUpClicked();
