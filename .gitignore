@@ -1,7 +1,20 @@
-build/
+# Build
+/build/
+build*/
 cmake-build-*/
+
+# Qt
+*.user
+*.user.*
+.qmake.stash
+
+# Editors
 .vscode/
 .idea/
-*.user
+*.swp
+*~
+
+# Logs
+*.log
 *.o
 *.exe

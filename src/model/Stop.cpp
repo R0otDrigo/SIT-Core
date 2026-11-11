@@ -1,18 +1,31 @@
 #include "model/Stop.h"
+
 #include <algorithm>
 
-namespace sit {
+namespace teoto {
 
-void Stop::addWaiting(int n) { waiting_ += std::max(0, n); }
-
-int Stop::takeWaiting(int n) {
-    int out = std::clamp(n, 0, waiting_);
-    waiting_ -= out;
-    return out;
+Stop::Stop(QString id, QString name, QGeoCoordinate position, int waitingPassengers)
+    : m_id(std::move(id))
+    , m_name(std::move(name))
+    , m_position(std::move(position))
+    , m_waitingPassengers(std::max(0, waitingPassengers))
+{
 }
 
-double Stop::saturation() const {
-    return maxWaiting_ > 0 ? static_cast<double>(waiting_) / maxWaiting_ : 0.0;
+void Stop::addWaiting(int passengers)
+{
+    if (passengers > 0)
+        m_waitingPassengers += passengers;
 }
 
-} // namespace sit
+int Stop::takeWaiting(int maxPassengers)
+{
+    if (maxPassengers <= 0)
+        return 0;
+
+    const int taken = std::min(maxPassengers, m_waitingPassengers);
+    m_waitingPassengers -= taken;
+    return taken;
+}
+
+} // namespace teoto

@@ -1,46 +1,35 @@
 #pragma once
-#include <string>
-#include "common/Position.h"
 
-namespace sit {
+#include <QGeoCoordinate>
+#include <QString>
 
-class Stop {
+namespace teoto {
+
+/// Paradero de una ruta. Mantiene la cantidad de pasajeros en espera de forma
+/// agregada (ver requerimientos RF-07 y RF-09).
+class Stop
+{
 public:
-    Stop(std::string name, Position pos, int maxWaiting)
-        : name_(std::move(name)), pos_(pos), maxWaiting_(maxWaiting) {}
-    virtual ~Stop() = default;
+    Stop() = default;
+    Stop(QString id, QString name, QGeoCoordinate position, int waitingPassengers = 0);
 
-    // Pasajeros nuevos por segundo (depende del tipo de paradero).
-    virtual double boardingRate() const = 0;
+    const QString &id() const { return m_id; }
+    const QString &name() const { return m_name; }
+    const QGeoCoordinate &position() const { return m_position; }
+    int waitingPassengers() const { return m_waitingPassengers; }
 
-    void addWaiting(int n);
-    int takeWaiting(int n);                 // sube pasajeros a un bus, devuelve cuantos salieron
-    int waiting() const { return waiting_; }
-    double saturation() const;              // 0.0 a 1.0+
+    /// Incrementa la demanda en espera (nunca negativa).
+    void addWaiting(int passengers);
 
-    const std::string& name() const { return name_; }
-    const Position& position() const { return pos_; }
-
-    // Para ordenar paraderos por saturacion.
-    bool operator<(const Stop& o) const { return saturation() < o.saturation(); }
+    /// Extrae hasta \a maxPassengers pasajeros en espera y devuelve cuantos se
+    /// pudieron tomar realmente.
+    int takeWaiting(int maxPassengers);
 
 private:
-    std::string name_;
-    Position pos_;
-    int maxWaiting_;
-    int waiting_{0};
+    QString m_id;
+    QString m_name;
+    QGeoCoordinate m_position;
+    int m_waitingPassengers{0};
 };
 
-class RegularStop : public Stop {
-public:
-    using Stop::Stop;
-    double boardingRate() const override { return 0.5; }
-};
-
-class Terminal : public Stop {
-public:
-    using Stop::Stop;
-    double boardingRate() const override { return 2.0; }
-};
-
-} // namespace sit
+} // namespace teoto

@@ -1,22 +1,36 @@
 #include "model/VehicleFactory.h"
-#include "common/Exceptions.h"
 
-namespace sit {
+#include <utility>
 
-std::unique_ptr<Vehicle> VehicleFactory::create(VehicleType type, int id, Position pos) {
+#include "model/FeederBus.h"
+#include "model/TrunkBus.h"
+
+namespace teoto {
+
+std::unique_ptr<Vehicle> VehicleFactory::create(
+    VehicleType type, QString id, std::shared_ptr<Route> route)
+{
     switch (type) {
-        case VehicleType::Conventional: return std::make_unique<ConventionalBus>(id, pos);
-        case VehicleType::Articulated:  return std::make_unique<ArticulatedBus>(id, pos);
-        case VehicleType::Feeder:       return std::make_unique<FeederBus>(id, pos);
+    case VehicleType::TrunkBus:
+        return std::make_unique<TrunkBus>(std::move(id), std::move(route));
+    case VehicleType::FeederBus:
+        return std::make_unique<FeederBus>(std::move(id), std::move(route));
     }
-    throw InvalidVehicleTypeException("desconocido");
+    return nullptr;
 }
 
-std::unique_ptr<Vehicle> VehicleFactory::create(const std::string& type, int id, Position pos) {
-    if (type == "convencional") return create(VehicleType::Conventional, id, pos);
-    if (type == "articulado")   return create(VehicleType::Articulated, id, pos);
-    if (type == "alimentador")  return create(VehicleType::Feeder, id, pos);
-    throw InvalidVehicleTypeException(type);
+std::unique_ptr<Vehicle> VehicleFactory::create(
+    const QString &type, QString id, std::shared_ptr<Route> route)
+{
+    if (type.compare(QStringLiteral("troncal"), Qt::CaseInsensitive) == 0
+        || type.compare(QStringLiteral("trunkbus"), Qt::CaseInsensitive) == 0) {
+        return create(VehicleType::TrunkBus, std::move(id), std::move(route));
+    }
+    if (type.compare(QStringLiteral("alimentador"), Qt::CaseInsensitive) == 0
+        || type.compare(QStringLiteral("feederbus"), Qt::CaseInsensitive) == 0) {
+        return create(VehicleType::FeederBus, std::move(id), std::move(route));
+    }
+    return nullptr;
 }
 
-} // namespace sit
+} // namespace teoto
