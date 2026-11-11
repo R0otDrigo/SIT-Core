@@ -1,0 +1,5 @@
+foreach(test_name IN ITEMS test_vehicle test_stop_repository)
+    add_executable(${test_name} ${test_name}.cpp)
+    target_link_libraries(${test_name} PRIVATE teoto_model)
+    add_test(NAME ${test_name} COMMAND ${test_name})
+endforeach()

@@ -1,82 +1,83 @@
-# TEO-TO — Simulador de flotas de transporte público (SIT Arequipa)
+# TEO-TO / SIT-Core
 
-Simulador académico de gestión y optimización de una flota de transporte público,
-inspirado en el **SIT de Arequipa**. Escrito en **C++20 + Qt 6 (Qt Quick/QML)** y
-construido con **CMake**.
+Simulador académico de una flota de transporte público inspirado en el SIT de Arequipa.
+Es el proyecto final de Tecnología de Objetos de la UNSA 2026; **no es un sistema oficial**.
 
-> Es un **simulador**, no un sistema oficial ni una réplica exacta del SIT real.
+## Estado del proyecto
 
-## Documentación
+La aplicación está en el **Prototipo 1 (P1)**: muestra el mapa de Arequipa (OpenStreetMap,
+con modo esquemático de respaldo), una ruta con cuatro paraderos y un bus en movimiento.
+El desarrollo sigue un enfoque de **prototipado evolutivo** en cinco prototipos.
 
-* [`requerimientos.md`](requerimientos.md) — especificación completa (RF/RNF,
-  arquitectura, patrones, criterios de aceptación, plan de 5 prototipos y riesgos).
-* [`docs/archive/proyecto-borrador.md`](docs/archive/proyecto-borrador.md) — borrador
-  original conservado como referencia.
+## Tecnologías y arquitectura
 
-## Estado actual: Prototipo 1 (P1)
-
-P1 es el primer programa funcional y valida el pipeline C++ ↔ QML con el mapa real:
-
-* Modelo reducido: `Vehicle`, `Bus`, `TrunkBus`, `FeederBus`, `Route`, `Stop`, `Fleet`.
-* Mapa real de Arequipa con **OpenStreetMap** (`Qt Location`).
-* Una ruta con 4 paraderos y un bus que avanza entre ellos.
-* Embarque/desembarque con `Bus::operator++` y control de capacidad.
-* **Modo esquemático** de respaldo si el mapa base no está disponible.
-* Controles: Iniciar/Pausar, Reiniciar y velocidad (0.5x–10x).
+- C++20, Qt 6.5+, Qt Quick/QML y CMake 3.21+.
+- Vista en QML y lógica de dominio en C++; el puente reactivo se implementa como ViewModel.
+- El modelo usa coordenadas geográficas (`QGeoCoordinate`) para representarse en el mapa.
+- La factoría de vehículos (`VehicleFactory`) y el `Repository<T>` genérico están integrados.
+- Los demás patrones se incorporarán cuando sus funcionalidades estén implementadas.
 
 ## Requisitos
 
-* CMake ≥ 3.21
-* Compilador con C++20
-* Qt 6.5 o superior con los módulos: `Core`, `Gui`, `Qml`, `Quick`,
-  `QuickControls2`, `Location`, `Positioning`, `Network`.
-
-En Arch/CachyOS:
+Se necesita un compilador C++20, CMake 3.21+ y Qt 6.5+ con Core, Gui, Qml, Quick,
+QuickControls2, Location, Positioning y Network. En Arch/CachyOS:
 
 ```bash
 sudo pacman -S qt6-quickcontrols2 qt6-location qt6-positioning qt6-network
 ```
 
-## Compilar y ejecutar
+## Compilar, probar y ejecutar
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build -j"$(nproc)"
-./build/teo_to
+ctest --test-dir build --output-on-failure
+./build/src/teo_to
 ```
 
-## Controles
+## Controles de P1
 
 | Acción | Control |
 |---|---|
-| Iniciar / Pausar | Botón *Iniciar/Pausar* |
-| Reiniciar | Botón *Reiniciar* |
-| Velocidad de simulación | Selector 0.5x / 1x / 2x / 5x / 10x |
-| Forzar modo esquemático | Interruptor *Esquemático* |
+| Iniciar / pausar | Botón de la barra superior |
+| Reiniciar | Botón Reiniciar |
+| Velocidad | Selector 0.5x / 1x / 2x / 5x / 10x |
+| Cambiar al mapa esquemático | Interruptor Esquemático |
+
+Los mensajes de Qt se escriben en `teo_to.log` dentro del directorio temporal del sistema.
 
 ## Estructura
 
 ```text
-src/
-├── main.cpp
-├── model/        # entidades puras de dominio
-├── viewmodel/    # QObject expuesto a QML
-├── utils/        # constantes, errores, logger
-└── qml/          # Main.qml, MapView.qml, MapFallback.qml
+src/model/       Entidades de dominio y factoría de vehículos
+src/common/      Repository genérico
+src/viewmodel/   Objetos C++ expuestos a QML
+src/qml/         Vistas y componentes gráficos
+tests/           Pruebas unitarias del modelo y Repository
 ```
 
-El archivo `teo_to.log` (en el directorio temporal del sistema) recoge los mensajes
-de Qt, útil porque Qt no siempre escribe a consola.
+## Prototipos
 
-## Plan de prototipos
-
-| # | Prototipo | Estado |
+| Prototipo | Alcance | Estado |
 |---|---|---|
-| P1 | Base + mapa real | ✅ Completado |
-| P2 | Simulador funcional (flota, demanda, controles) | ⏳ Pendiente |
-| P3 | Concurrencia (`QThread`) + Dashboard | ⏳ Pendiente |
-| P4 | Dinámica + patrones (Factory, Decorator, despacho) | ⏳ Pendiente |
-| P5 | Persistencia JSON/CSV + tests + pulido | ⏳ Pendiente |
+| P1 | Mapa, ruta, paraderos y un bus | Completado |
+| P2 | Flota, demanda y controles ampliados | Pendiente |
+| P3 | Motor concurrente y dashboard | Pendiente |
+| P4 | Tráfico, incidentes y despacho | Pendiente |
+| P5 | JSON/CSV, pruebas completas y pulido | Pendiente |
 
-Metodología: **prototipado evolutivo** — cada prototipo mejora al anterior y se
-mantiene funcional. Ver `requerimientos.md` §17.
+Ver [`requerimientos.md`](requerimientos.md) para la especificación y los criterios de
+aceptación. El borrador inicial está conservado en
+[`docs/archive/proyecto-borrador.md`](docs/archive/proyecto-borrador.md).
+
+## Flujo de trabajo del equipo
+
+- Usar ramas `feature/<nombre>` y Pull Requests hacia `main`, con al menos una revisión.
+- Mantener `main` compilable y ejecutar `ctest` antes de solicitar la integración.
+- Usar mensajes de commit en formato convencional, por ejemplo `feat: agrega ...`,
+  `fix: ...`, `test: ...` y `docs: ...`.
+
+## Integrantes
+
+Retamozo Angel, Castillo Rodrigo, Estefanero Rodrigo, Mamani Renzo, Camani Ronald y
+Sarmiento Limberg.
