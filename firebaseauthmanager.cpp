@@ -2,6 +2,8 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QUrlQuery>
+#include <iostream>
+
 
 FirebaseAuthManager::FirebaseAuthManager(QObject *parent)
     : QObject(parent)
@@ -22,6 +24,7 @@ void FirebaseAuthManager::setProjectId(const QString &projectId)
 void FirebaseAuthManager::signIn(const QString &email, const QString &password)
 {
     if (m_apiKey.isEmpty()) {
+        std::cout << "Q ..." << std::endl;
         emit signInFailed("Firebase API key not configured");
         return;
     }
@@ -40,12 +43,18 @@ void FirebaseAuthManager::signIn(const QString &email, const QString &password)
 }
 
 
-void FirebaseAuthManager::signUp(const QString &email, const QString &password)
+void FirebaseAuthManager::signUp(const QString &email, const QString &password, const QString &role)
 {
+    qDebug() << "🔍 [1] signUp() llamado";  // ← ¿Se imprime?
     if (m_apiKey.isEmpty()) {
+
+        qDebug() << "🔍 [2] API KEY VACÍA, return early";  // ← ¿Se imprime?
         emit signUpFailed("Firebase API key not configured");  // ← signal propio
         return;
     }
+
+
+    m_user_role = role;
 
     QUrl url = QUrl("https://identitytoolkit.googleapis.com/v1/accounts:signUp");
     QUrlQuery query;
@@ -62,7 +71,6 @@ void FirebaseAuthManager::signUp(const QString &email, const QString &password)
 
     QNetworkReply *reply = m_networkManager->post(request, QJsonDocument(json).toJson());
     connect(reply, &QNetworkReply::finished, this, &FirebaseAuthManager::onSignUpReplyFinished);  // ← slot propio
-    reply->deleteLater();
 }
 
 void FirebaseAuthManager::onSignUpReplyFinished()
@@ -81,6 +89,57 @@ void FirebaseAuthManager::onSignUpReplyFinished()
     QString m_idToken = data["idToken"].toString();
     QString m_refreshToken = data["refreshToken"].toString();
     QString m_uid = data["localId"].toString();
+
+    std::cout << "PASO POR SIGN UP RELLY" << std::endl;
+
+    qDebug() << "✅ onSignUpReplyFinished se ejecutó";  // ← si NO ves esto, es deleteLater
+    qDebug() << "Error:" << reply->error() << reply->errorString();
+    qDebug() << "Body:" << reply->readAll();
+
+
+    // Ahora vamos a crear un 'documento' de firestore para almacenar los usuarios con sus respectivos roles
+    createFirestoreUser();
+}
+
+
+void FirebaseAuthManager::createFirestoreUser()
+{
+    // POST /v1/projects/{PROJECT_ID}/databases/(default)/documents/users/{UID}
+    QUrl url = QUrl(
+        QString("https://firestore.googleapis.com/v1/projects/%1/databases/(default)/documents/users/%2")
+            .arg(m_projectId, m_uid)
+    );
+
+    QNetworkRequest request(url);
+    request.setRawHeader("Authorization", m_idToken.toUtf8());  // ← el token de Auth
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    // El body de Firestore usa el formato "fields" con tipos explícitos
+    QJsonObject roleField;
+    roleField["stringValue"] = m_user_role;  // ← "admin", "user", etc.
+
+    QJsonObject fields;
+    fields["role"] = roleField;
+
+    QJsonObject body;
+    body["fields"] = fields;
+
+    QNetworkReply *reply = m_networkManager->post(request, QJsonDocument(body).toJson());
+    connect(reply, &QNetworkReply::finished, this, &FirebaseAuthManager::onFirestoreUserCreated);
+}
+
+void FirebaseAuthManager::onFirestoreUserCreated()
+{
+    QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
+    if (!reply) return;
+    reply->deleteLater();
+
+    if (reply->error() != QNetworkReply::NoError) {
+        QJsonObject err = QJsonDocument::fromJson(reply->readAll())
+                              .object().value("error").toObject();
+        emit signUpFailed("User created but Firestore failed: " + err.value("message").toString());
+        return;
+    }
 
     emit signUpSucceeded(m_uid);
 }

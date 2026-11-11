@@ -1,6 +1,7 @@
 #include <QQmlApplicationEngine>
 #include <QApplication>
 #include "login.h"
+#include "signup.h"
 #include "admindashboard.h"
 #include "userdashboard.h"
 #include "guestdashboard.h"

@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QString>
 #include "firebaseauthmanager.h"
+#include "signup.h"
 
 namespace Ui {
 class Login;
@@ -30,6 +31,7 @@ private slots:
 
 private:
     Ui::Login *ui;
+    Ui::SignUp *signUp;
     FirebaseAuthManager *m_authManager;
 };
 

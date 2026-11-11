@@ -13,10 +13,11 @@ class FirebaseAuthManager : public QObject
 public:
     explicit FirebaseAuthManager(QObject *parent = nullptr);
 
-    void signUp(const QString &email, const QString &password);
+    void signUp(const QString &email, const QString &password, const QString &role);
     void signIn(const QString &email, const QString &password);
     void setApiKey(const QString &apiKey);
     void setProjectId(const QString &projectId);
+    void createFirestoreUser();
 
 signals:
     void signUpSucceeded(const QString &uid);
@@ -27,11 +28,15 @@ signals:
 private slots:
     void onSignUpReplyFinished();
     void onSignInReplyFinished();
+    void onFirestoreUserCreated();
 
 private:
     QNetworkAccessManager *m_networkManager;
     QString m_apiKey;
     QString m_projectId;
+    QString m_user_role;
+    QString m_idToken;
+    QString m_uid;
 };
 
 #endif // FIREBASEAUTHMANAGER_H

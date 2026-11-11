@@ -14,8 +14,15 @@ class SignUp : public QWidget
     Q_OBJECT
 
 public:
+    void setFirebaseConfig(const QString &apiKey, const QString &projectId);
     explicit SignUp(QWidget *parent = nullptr);
     ~SignUp();
+
+
+private slots:
+    void onSignUpClicked();
+    void onSignUpSuccess();
+    void onSignUpFailed(const QString &error);
 
 private:
     Ui::SignUp *ui;
