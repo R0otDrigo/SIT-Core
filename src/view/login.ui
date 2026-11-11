@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Login</class>
+ <widget class="QWidget" name="Login">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>480</width>
+    <height>460</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Iniciar Sesión</string>
+  </property>
+  <layout class="QVBoxLayout" name="rootLayout">
+   <item>
+    <spacer name="topSpacer">
+     <property name="orientation">
+      <enum>Qt::Orientation::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item alignment="Qt::AlignmentFlag::AlignHCenter">
+    <widget class="QFrame" name="card">
+     <property name="minimumSize">
+      <size>
+       <width>320</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>380</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="role" stdset="0">
+      <string notr="true">card</string>
+     </property>
+     <layout class="QVBoxLayout" name="cardLayout">
+      <property name="spacing">
+       <number>6</number>
+      </property>
+      <property name="leftMargin">
+       <number>28</number>
+      </property>
+      <property name="topMargin">
+       <number>28</number>
+      </property>
+      <property name="rightMargin">
+       <number>28</number>
+      </property>
+      <property name="bottomMargin">
+       <number>28</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="titleLabel">
+        <property name="text">
+         <string notr="true">SIT-Core</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
+        </property>
+        <property name="role" stdset="0">
+         <string notr="true">title</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="subtitleLabel">
+        <property name="text">
+         <string>Sistema Integrado de Transporte · Arequipa</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="role" stdset="0">
+         <string notr="true">subtitle</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="headerSpacer">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Policy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>0</width>
+          <height>12</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="correoLabel">
+        <property name="text">
+         <string>Correo</string>
+        </property>
+        <property name="buddy">
+         <cstring>correoLineEdit</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="correoLineEdit">
+        <property name="placeholderText">
+         <string>nombre@ejemplo.com</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="contraseALabel">
+        <property name="text">
+         <string>Contraseña</string>
+        </property>
+        <property name="buddy">
+         <cstring>contraseALineEdit</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="contraseALineEdit">
+        <property name="echoMode">
+         <enum>QLineEdit::EchoMode::Password</enum>
+        </property>
+        <property name="placeholderText">
+         <string>Tu contraseña</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="info">
+        <property name="visible">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+        <property name="role" stdset="0">
+         <string notr="true">error</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="formSpacer">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Policy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>0</width>
+          <height>8</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="loginButton">
+        <property name="text">
+         <string>Ingresar</string>
+        </property>
+        <property name="default">
+         <bool>true</bool>
+        </property>
+        <property name="variant" stdset="0">
+         <string notr="true">primary</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="signUpButton">
+        <property name="text">
+         <string>¿No tienes cuenta? Regístrate</string>
+        </property>
+        <property name="variant" stdset="0">
+         <string notr="true">ghost</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="exitButton">
+        <property name="text">
+         <string>Salir</string>
+        </property>
+        <property name="variant" stdset="0">
+         <string notr="true">ghost</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="bottomSpacer">
+     <property name="orientation">
+      <enum>Qt::Orientation::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>correoLineEdit</tabstop>
+  <tabstop>contraseALineEdit</tabstop>
+  <tabstop>loginButton</tabstop>
+  <tabstop>signUpButton</tabstop>
+  <tabstop>exitButton</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>
