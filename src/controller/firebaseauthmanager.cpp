@@ -1,0 +1,227 @@
+#include "firebaseauthmanager.h"
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QUrlQuery>
+
+FirebaseAuthManager &FirebaseAuthManager::instance() {
+  static FirebaseAuthManager instance;
+  return instance;
+}
+
+FirebaseAuthManager::FirebaseAuthManager(QObject *parent)
+    : QObject(parent), m_networkManager(new QNetworkAccessManager(this)) {}
+
+void FirebaseAuthManager::clearSession() {
+  m_idToken.clear();
+  m_uid.clear();
+  m_user_role.clear();
+  m_user_username.clear();
+}
+
+void FirebaseAuthManager::setApiKey(const QString &apiKey) {
+  m_apiKey = apiKey;
+}
+
+void FirebaseAuthManager::setProjectId(const QString &projectId) {
+  m_projectId = projectId;
+}
+
+void FirebaseAuthManager::signIn(const QString &email,
+                                 const QString &password) {
+  if (m_apiKey.isEmpty()) {
+    emit signInFailed("Firebase API key not configured");
+    return;
+  }
+
+  QNetworkRequest request(QUrl(QString("https://identitytoolkit.googleapis.com/"
+                                       "v1/accounts:signInWithPassword?key=%1")
+                                   .arg(m_apiKey)));
+  request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+  QJsonObject json;
+  json["email"] = email;
+  json["password"] = password;
+  json["returnSecureToken"] = true;
+
+  QNetworkReply *reply =
+      m_networkManager->post(request, QJsonDocument(json).toJson());
+  connect(reply, &QNetworkReply::finished, this,
+          &FirebaseAuthManager::onSignInReplyFinished);
+}
+
+void FirebaseAuthManager::signUp(const QString &email, const QString &password,
+                                 const QString &role, const QString &username) {
+  if (m_apiKey.isEmpty()) {
+    emit signUpFailed("Firebase API key not configured");
+    return;
+  }
+
+  m_user_role = role;
+  m_user_username = username;
+
+  QUrl url = QUrl("https://identitytoolkit.googleapis.com/v1/accounts:signUp");
+  QUrlQuery query;
+  query.addQueryItem("key", m_apiKey);
+  url.setQuery(query);
+
+  QNetworkRequest request(url);
+  request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+  QJsonObject json;
+  json["email"] = email;
+  json["password"] = password;
+  json["returnSecureToken"] = true;
+
+  QNetworkReply *reply =
+      m_networkManager->post(request, QJsonDocument(json).toJson());
+  connect(reply, &QNetworkReply::finished, this,
+          &FirebaseAuthManager::onSignUpReplyFinished);
+}
+
+void FirebaseAuthManager::onSignUpReplyFinished() {
+  QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
+  if (!reply)
+    return;
+  reply->deleteLater();
+
+  if (reply->error() != QNetworkReply::NoError) {
+    QJsonObject err = QJsonDocument::fromJson(reply->readAll())
+                          .object()
+                          .value("error")
+                          .toObject();
+    emit signUpFailed(err.value("message").toString());
+    return;
+  }
+
+  QJsonObject data = QJsonDocument::fromJson(reply->readAll()).object();
+  m_idToken = data["idToken"].toString();
+  m_uid = data["localId"].toString();
+
+  // Ahora vamos a crear un 'documento' de firestore para almacenar los usuarios
+  // con sus respectivos roles
+  createFirestoreUser();
+}
+
+void FirebaseAuthManager::createFirestoreUser() {
+  // PATCH crea (o reemplaza) el documento users/{UID}. Un POST a
+  // .../users/{UID} no es valido en la API REST de Firestore: POST solo crea
+  // documentos con ID automatico.
+  QUrl url(QString("https://firestore.googleapis.com/v1/projects/%1/databases/"
+                   "(default)/documents/users/%2")
+               .arg(m_projectId, m_uid));
+
+  QNetworkRequest request(url);
+  request.setRawHeader("Authorization",
+                       QByteArray("Bearer ") + m_idToken.toUtf8());
+  request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+  // El body de Firestore usa el formato "fields" con tipos explícitos
+  QJsonObject roleField;
+  roleField["stringValue"] = m_user_role; // "ADMIN", "USER" o "GUEST"
+
+  QJsonObject usernameField;
+  usernameField["stringValue"] = m_user_username;
+
+  QJsonObject fields;
+  fields["role"] = roleField;
+  fields["username"] = usernameField;
+
+  QJsonObject body;
+  body["fields"] = fields;
+
+  QNetworkReply *reply = m_networkManager->sendCustomRequest(
+      request, "PATCH", QJsonDocument(body).toJson());
+  connect(reply, &QNetworkReply::finished, this,
+          &FirebaseAuthManager::onFirestoreUserCreated);
+}
+
+void FirebaseAuthManager::onFirestoreUserCreated() {
+  QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
+  if (!reply)
+    return;
+  reply->deleteLater();
+
+  if (reply->error() != QNetworkReply::NoError) {
+    QJsonObject err = QJsonDocument::fromJson(reply->readAll())
+                          .object()
+                          .value("error")
+                          .toObject();
+    emit signUpFailed("User created but Firestore failed: " +
+                      err.value("message").toString());
+    return;
+  }
+
+  emit signUpSucceeded(m_uid);
+}
+
+void FirebaseAuthManager::onSignInReplyFinished() {
+  QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
+  if (!reply)
+    return;
+
+  if (reply->error() == QNetworkReply::NoError) {
+    QByteArray data = reply->readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    QJsonObject obj = doc.object();
+    QString localId = obj["localId"].toString();
+    QString idToken = obj["idToken"].toString();
+    m_uid = localId;
+    m_idToken = idToken;
+
+    // Fetch user role from Firestore/Realtime Database
+    if (!m_projectId.isEmpty()) {
+      QNetworkRequest roleRequest(
+          QUrl(QString("https://firestore.googleapis.com/v1/projects/%1/"
+                       "databases/(default)/documents/users/%2")
+                   .arg(m_projectId)
+                   .arg(localId)));
+      roleRequest.setRawHeader("Authorization",
+                               QString("Bearer %1").arg(idToken).toUtf8());
+      QNetworkReply *roleReply = m_networkManager->get(roleRequest);
+      connect(roleReply, &QNetworkReply::finished, this,
+              [this, localId, idToken, roleReply]() {
+                if (roleReply->error() == QNetworkReply::NoError) {
+                  QByteArray roleData = roleReply->readAll();
+                  QJsonDocument roleDoc = QJsonDocument::fromJson(roleData);
+                  QJsonObject roleObj = roleDoc.object();
+                  QJsonObject fields = roleObj["fields"].toObject();
+                  QString role = "user";
+                  if (fields.contains("role") && fields["role"].isObject()) {
+                    QJsonObject roleField = fields["role"].toObject();
+                    if (roleField.contains("stringValue")) {
+                      role = roleField["stringValue"].toString();
+                    }
+                  }
+                  if (role.isEmpty())
+                    role = "user";
+                  m_user_role = role;
+                  emit signInSuccess(localId, idToken, role);
+                } else {
+                  qWarning() << "No se pudo leer el rol desde Firestore:"
+                             << roleReply->errorString();
+                  m_user_role = "user";
+                  emit signInSuccess(localId, idToken, "user");
+                }
+                roleReply->deleteLater();
+              });
+    } else {
+      m_user_role = "user";
+      emit signInSuccess(localId, idToken, "user");
+    }
+  } else {
+    QByteArray errorData = reply->readAll();
+    QJsonDocument errorDoc = QJsonDocument::fromJson(errorData);
+    QString errorMsg = reply->errorString();
+    if (errorDoc.isObject()) {
+      QJsonObject errObj = errorDoc.object();
+      if (errObj.contains("error") && errObj["error"].isObject()) {
+        QJsonObject errorDetail = errObj["error"].toObject();
+        if (errorDetail.contains("message")) {
+          errorMsg = errorDetail["message"].toString();
+        }
+      }
+    }
+    emit signInFailed(errorMsg);
+  }
+  reply->deleteLater();
+}
