@@ -25,13 +25,14 @@ signals:
 private slots:
     void onLoginClicked();
     void onSignUpClicked();
+    void onSignUpSuccess();
     void onSignInSuccess(const QString &localId, const QString &idToken, const QString &role);
     void onSignInFailed(const QString &error);
 
 
 private:
     Ui::Login *ui;
-    Ui::SignUp *signUp;
+    SignUp *signUp;
     FirebaseAuthManager *m_authManager;
 };
 

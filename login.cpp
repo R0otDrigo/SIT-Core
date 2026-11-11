@@ -8,7 +8,7 @@
 Login::Login(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Login)
-    , signUp(new Ui::SignUp)
+    , signUp(nullptr)
     , m_authManager(new FirebaseAuthManager(this))
 {
     ui->setupUi(this);
@@ -17,8 +17,7 @@ Login::Login(QWidget *parent)
     connect(ui->signUpButton, &QPushButton::clicked, this, &Login::onSignUpClicked);
     connect(m_authManager, &FirebaseAuthManager::signInSuccess, this, &Login::onSignInSuccess);
     connect(m_authManager, &FirebaseAuthManager::signInFailed, this, &Login::onSignInFailed);
-
-
+    connect(m_authManager, &FirebaseAuthManager::signUpSucceeded, this, &Login::onSignUpSuccess);
 }
 
 
@@ -45,11 +44,13 @@ void Login::onLoginClicked()
 
 
 void Login::onSignUpClicked(){
-    // Crear el objeto en el heap
-    SignUp *signDialog = new SignUp(this);
 
-    // Importante: decirle a Qt que elimine la memoria automáticamente al cerrar la ventana
-    signDialog->setAttribute(Qt::WA_DeleteOnClose);
+    if (!signUp) {
+        signUp = new SignUp();
+        connect(signUp, &SignUp::closed, this, &Login::show);
+    }
+
+    signUp->setFirebaseAuthManager(m_authManager);
 
     const QString configPath = QCoreApplication::applicationDirPath() + "/config.ini";
     QSettings settings(configPath, QSettings::IniFormat);
@@ -57,9 +58,12 @@ void Login::onSignUpClicked(){
     QString API_KEY = settings.value("FIREBASE_API_KEY").toString();
 
     QString PROJECT_ID = settings.value("FIREBASE_PROJECT_ID").toString();
-    signDialog->setFirebaseConfig(API_KEY, PROJECT_ID);
+    signUp->setFirebaseConfig(API_KEY, PROJECT_ID);
 
-    signDialog->show();
+    signUp->show();
+
+    this->hide();
+
 }
 void Login::onSignInSuccess(const QString &localId, const QString &idToken, const QString &role)
 {
@@ -77,8 +81,13 @@ void Login::onSignInFailed(const QString &error)
     ui->info->setText("Error: " + error);
 }
 
+void Login::onSignUpSuccess(){
+    this->show();
+}
+
 
 Login::~Login()
 {
+    delete signUp;
     delete ui;
 }
