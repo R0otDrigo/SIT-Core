@@ -1,7 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file alias="qml/Main.qml">src/qml/Main.qml</file>
-        <file alias="qml/MapView.qml">src/qml/MapView.qml</file>
-        <file alias="qml/MapFallback.qml">src/qml/MapFallback.qml</file>
-    </qresource>
-</RCC>
