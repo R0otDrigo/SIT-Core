@@ -1,0 +1,31 @@
+# SIT-Core: red de transporte inspirada en Arequipa (coordenadas ficticias del mapa)
+# LIMIT,maxBuses | STOP,id,nombre,tipo,x,y,capacidad | ROUTE,id,nombre,tipo,color,ids | FLEET,ruta,tipoBus,indiceInicial
+LIMIT,10
+
+STOP,CAY,Terminal Cayma,terminal,130,50,120
+STOP,YAN,Yanahuara,regular,170,140,80
+STOP,PLA,Plaza de Armas,transfer,280,230,150
+STOP,MSC,Mercado San Camilo,regular,300,330,90
+STOP,PAR,Av. Parra,regular,330,420,80
+STOP,SOC,Terminal Socabaya,terminal,360,500,120
+STOP,CCO,Terminal Cerro Colorado,terminal,40,270,120
+STOP,EJE,Av. Ejercito,regular,160,250,80
+STOP,GRA,Puente Grau,transfer,420,240,150
+STOP,PAU,Paucarpata,regular,560,260,90
+STOP,TPA,Terminal Paucarpata,terminal,700,280,120
+STOP,ASA,Alto Selva Alegre,regular,310,50,70
+STOP,IND,Av. Independencia,regular,220,45,60
+STOP,MIR,Miraflores,regular,560,120,70
+STOP,HUN,Hunter,regular,500,185,60
+
+ROUTE,T1,Troncal Norte-Sur,trunk,#e63946,CAY;YAN;PLA;MSC;PAR;SOC
+ROUTE,T2,Troncal Este-Oeste,trunk,#1d70b8,CCO;EJE;PLA;GRA;PAU;TPA
+ROUTE,A1,Alimentadora Alto Selva Alegre,feeder,#2a9d8f,ASA;IND;CAY
+ROUTE,A2,Alimentadora Miraflores,feeder,#f4a261,MIR;HUN;GRA
+
+FLEET,T1,articulado,0
+FLEET,T1,convencional,3
+FLEET,T2,convencional,0
+FLEET,T2,articulado,4
+FLEET,A1,alimentador,0
+FLEET,A2,alimentador,0
