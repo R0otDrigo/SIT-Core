@@ -1,47 +1,37 @@
 #pragma once
-
-#include <cstddef>
-#include <optional>
+#include <memory>
+#include <string>
 #include <vector>
-
-#include <QString>
-
 #include "model/Stop.h"
 
-namespace teoto {
+namespace sit {
 
-/// Ruta compuesta por una secuencia ordenada de paraderos (RF-05, RF-06).
-class Route
-{
+enum class RouteKind { Trunk, Feeder };
+
+// Recorrido ordenado de paraderos. Los paraderos son compartidos (shared_ptr) entre rutas:
+// asi una estacion de transferencia pertenece a varias rutas a la vez.
+class Route {
 public:
-    Route(QString id, QString name);
+    Route(std::string id, std::string name, RouteKind kind, std::string color)
+        : id_(std::move(id)), name_(std::move(name)), kind_(kind), color_(std::move(color)) {}
 
-    const QString &id() const { return m_id; }
-    const QString &name() const { return m_name; }
+    void addStop(std::shared_ptr<Stop> stop) { stops_.push_back(std::move(stop)); }
 
-    void addStop(const Stop &stop);
+    const std::string& id() const { return id_; }
+    const std::string& name() const { return name_; }
+    RouteKind kind() const { return kind_; }
+    const std::string& color() const { return color_; }
+    const std::vector<std::shared_ptr<Stop>>& stops() const { return stops_; }
+    std::size_t size() const { return stops_.size(); }
 
-    std::size_t stopCount() const { return m_stops.size(); }
-    const std::vector<Stop> &stops() const { return m_stops; }
-
-    /// Devuelve el paradero en \a index, o nullptr si el indice es invalido.
-    const Stop *stopAt(std::size_t index) const;
-
-    /// Igual que stopAt() pero permite modificar el paradero (p. ej. su demanda).
-    Stop *mutableStopAt(std::size_t index);
-
-    std::optional<std::size_t> indexOfStop(const QString &stopId) const;
-
-    /// Longitud del segmento que empieza en \a fromIndex (0 si es invalido).
-    double segmentLength(std::size_t fromIndex) const;
-
-    /// Longitud total de la ruta en metros, incluido el cierre al primer paradero.
-    double totalLength() const;
+    double length() const;
 
 private:
-    QString m_id;
-    QString m_name;
-    std::vector<Stop> m_stops;
+    std::string id_;
+    std::string name_;
+    RouteKind kind_;
+    std::string color_;
+    std::vector<std::shared_ptr<Stop>> stops_;
 };
 
-} // namespace teoto
+} // namespace sit

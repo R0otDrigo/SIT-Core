@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 #include <cstdlib>
 #include <iostream>
 
@@ -6,6 +7,8 @@
 #define CHECK(cond) do { if (!(cond)) { \
     std::cerr << "FALLO " << __FILE__ << ":" << __LINE__ << "  " #cond "\n"; \
     std::exit(1); } } while (0)
+
+#define CHECK_NEAR(a, b, eps) CHECK(std::fabs((a) - (b)) <= (eps))
 
 #define CHECK_THROWS(expr, ExType) do { bool ok_ = false; \
     try { expr; } catch (const ExType&) { ok_ = true; } \
