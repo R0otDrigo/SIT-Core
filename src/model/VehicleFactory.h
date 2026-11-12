@@ -1,23 +1,20 @@
 #pragma once
-
 #include <memory>
-#include <QString>
-
+#include <string>
 #include "model/Vehicle.h"
-#include "model/Route.h"
 
-namespace teoto {
+namespace sit {
 
-/// Crea los tipos de vehiculo disponibles sin acoplar al cliente a sus clases.
+enum class VehicleType { Conventional, Articulated, Feeder };
+
+// Patron creacional: Factory Method.
 class VehicleFactory {
 public:
-    /// Devuelve nullptr cuando el tipo no es valido.
-    static std::unique_ptr<Vehicle> create(
-        VehicleType type, QString id, std::shared_ptr<Route> route);
-
-    /// Variante para tipos recibidos como texto desde escenarios o la interfaz.
-    static std::unique_ptr<Vehicle> create(
-        const QString &type, QString id, std::shared_ptr<Route> route);
+    static std::unique_ptr<Vehicle> create(VehicleType type, int id, Position pos = {});
+    // Util para cargar desde archivos: "convencional", "articulado", "alimentador".
+    static std::unique_ptr<Vehicle> create(const std::string& type, int id, Position pos = {});
+    static VehicleType parse(const std::string& type);   // lanza InvalidVehicleTypeException
+    static std::string label(VehicleType type);
 };
 
-} // namespace teoto
+} // namespace sit

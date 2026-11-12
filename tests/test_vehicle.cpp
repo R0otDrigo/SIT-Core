@@ -1,37 +1,24 @@
 #include "check.h"
+#include "common/Exceptions.h"
 #include "model/VehicleFactory.h"
-#include "model/Bus.h"
-#include "model/Route.h"
 
-using namespace teoto;
+using namespace sit;
 
 int main() {
-    auto route = std::make_shared<Route>("R1", "Ruta de prueba");
-    route->addStop(Stop("S1", "Inicio", QGeoCoordinate(-16.4290, -71.5210)));
-    route->addStop(Stop("S2", "Centro", QGeoCoordinate(-16.3989, -71.5369)));
+    auto bus = VehicleFactory::create(VehicleType::Articulated, 1);
+    CHECK(bus->capacity() == 160);
 
-    auto vehicle = VehicleFactory::create(VehicleType::TrunkBus, "BUS-1", route);
-    CHECK(vehicle != nullptr);
-    CHECK(vehicle->type() == VehicleType::TrunkBus);
-    CHECK(vehicle->capacity() == 90);
+    bus->board(100);
+    CHECK(bus->passengers() == 100);
+    CHECK_THROWS(bus->board(100), CapacityExceededException);
+    CHECK(bus->alight(30) == 30);
+    CHECK(bus->freeSeats() == 90);
 
-    auto *bus = dynamic_cast<Bus *>(vehicle.get());
-    CHECK(bus != nullptr);
-    for (int i = 0; i < bus->capacity(); ++i)
-        CHECK(bus->boardPassenger());
-    CHECK(!bus->boardPassenger());
-    CHECK(bus->occupancy() == 90);
-    CHECK(bus->disembark(30) == 30);
-    CHECK(bus->occupancy() == 60);
+    auto feeder = VehicleFactory::create("alimentador", 2);
+    CHECK(feeder->typeName() == "Alimentador");
+    CHECK_THROWS(VehicleFactory::create("avion", 3), InvalidVehicleTypeException);
 
-    const auto start = bus->position();
-    bus->update(10.0);
-    CHECK(bus->position() != start);
-
-    const auto feeder = VehicleFactory::create(QStringLiteral("alimentador"), "F-1", route);
-    CHECK(feeder != nullptr);
-    CHECK(feeder->type() == VehicleType::FeederBus);
-    CHECK(feeder->capacity() == 40);
-    CHECK(VehicleFactory::create(QStringLiteral("unknown"), "X", route) == nullptr);
+    bus->moveTowards({100, 0}, 1.0);     // velocidad 8
+    CHECK(bus->position() == (Position{8, 0}));
     return 0;
 }

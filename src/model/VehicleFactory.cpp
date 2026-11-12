@@ -1,36 +1,35 @@
 #include "model/VehicleFactory.h"
+#include "common/Exceptions.h"
 
-#include <utility>
+namespace sit {
 
-#include "model/FeederBus.h"
-#include "model/TrunkBus.h"
-
-namespace teoto {
-
-std::unique_ptr<Vehicle> VehicleFactory::create(
-    VehicleType type, QString id, std::shared_ptr<Route> route)
-{
+std::unique_ptr<Vehicle> VehicleFactory::create(VehicleType type, int id, Position pos) {
     switch (type) {
-    case VehicleType::TrunkBus:
-        return std::make_unique<TrunkBus>(std::move(id), std::move(route));
-    case VehicleType::FeederBus:
-        return std::make_unique<FeederBus>(std::move(id), std::move(route));
+        case VehicleType::Conventional: return std::make_unique<ConventionalBus>(id, pos);
+        case VehicleType::Articulated:  return std::make_unique<ArticulatedBus>(id, pos);
+        case VehicleType::Feeder:       return std::make_unique<FeederBus>(id, pos);
     }
-    return nullptr;
+    throw InvalidVehicleTypeException("desconocido");
 }
 
-std::unique_ptr<Vehicle> VehicleFactory::create(
-    const QString &type, QString id, std::shared_ptr<Route> route)
-{
-    if (type.compare(QStringLiteral("troncal"), Qt::CaseInsensitive) == 0
-        || type.compare(QStringLiteral("trunkbus"), Qt::CaseInsensitive) == 0) {
-        return create(VehicleType::TrunkBus, std::move(id), std::move(route));
-    }
-    if (type.compare(QStringLiteral("alimentador"), Qt::CaseInsensitive) == 0
-        || type.compare(QStringLiteral("feederbus"), Qt::CaseInsensitive) == 0) {
-        return create(VehicleType::FeederBus, std::move(id), std::move(route));
-    }
-    return nullptr;
+std::unique_ptr<Vehicle> VehicleFactory::create(const std::string& type, int id, Position pos) {
+    return create(parse(type), id, pos);
 }
 
-} // namespace teoto
+VehicleType VehicleFactory::parse(const std::string& type) {
+    if (type == "convencional") return VehicleType::Conventional;
+    if (type == "articulado")   return VehicleType::Articulated;
+    if (type == "alimentador")  return VehicleType::Feeder;
+    throw InvalidVehicleTypeException(type);
+}
+
+std::string VehicleFactory::label(VehicleType type) {
+    switch (type) {
+        case VehicleType::Conventional: return "Convencional";
+        case VehicleType::Articulated:  return "Articulado";
+        case VehicleType::Feeder:       return "Alimentador";
+    }
+    return "?";
+}
+
+} // namespace sit
