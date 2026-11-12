@@ -1,83 +1,78 @@
-# TEO-TO / SIT-Core
+# SIT-Core — Demo 1
 
-Simulador académico de una flota de transporte público inspirado en el SIT de Arequipa.
-Es el proyecto final de Tecnología de Objetos de la UNSA 2026; **no es un sistema oficial**.
+**Simulador y gestor en tiempo real de una red de transporte publico urbano** (rutas troncales y
+alimentadoras de Arequipa). Proyecto final de Tecnologia de Objetos — UNSA, Arequipa 2026.
 
-## Estado del proyecto
+![SIT-Core](docs/screenshot.png)
 
-La aplicación está en el **Prototipo 1 (P1)**: muestra el mapa de Arequipa (OpenStreetMap,
-con modo esquemático de respaldo), una ruta con cuatro paraderos y un bus en movimiento.
-El desarrollo sigue un enfoque de **prototipado evolutivo** en cinco prototipos.
+## Que hace la Demo 1
 
-## Tecnologías y arquitectura
+- Mapa en vivo con 2 rutas **troncales** (T1, T2) y 2 **alimentadoras** (A1, A2), 15 paraderos.
+- 3 tipos de bus (convencional, articulado, alimentador) con distinta capacidad y velocidad.
+- Pasajeros que llegan segun la hora (horas punta 8:00 y 18:00); reloj simulado desde las 06:00.
+  Un paradero desbordado rechaza gente ("desistieron").
+- **Eventos de trafico** provocados a mano: accidente, obra vial (ruta lenta) y protesta (cierra un paradero).
+- **Controlador de flota**: despachar y retirar buses desde el panel; pausa y velocidad 1x–20x.
+- Indicadores en vivo y registro de eventos.
 
-- C++20, Qt 6.5+, Qt Quick/QML y CMake 3.21+.
-- Vista en QML y lógica de dominio en C++; el puente reactivo se implementa como ViewModel.
-- El modelo usa coordenadas geográficas (`QGeoCoordinate`) para representarse en el mapa.
-- La factoría de vehículos (`VehicleFactory`) y el `Repository<T>` genérico están integrados.
-- Los demás patrones se incorporarán cuando sus funcionalidades estén implementadas.
+Llega en la **Demo 2**: despacho automatico por saturacion (2da estrategia), eventos aleatorios en un
+segundo hilo, adapter JSON + factory de fuentes, documentacion final (UML, informe, impacto social).
 
-## Requisitos
+## Compilar y ejecutar
 
-Se necesita un compilador C++20, CMake 3.21+ y Qt 6.5+ con Core, Gui, Qml, Quick,
-QuickControls2, Location, Positioning y Network. En Arch/CachyOS:
-
-```bash
-sudo pacman -S qt6-quickcontrols2 qt6-location qt6-positioning qt6-network
-```
-
-## Compilar, probar y ejecutar
+Requisitos: CMake >= 3.16, compilador C++17 y Qt 6 (Widgets).
 
 ```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
-cmake --build build -j"$(nproc)"
-ctest --test-dir build --output-on-failure
-./build/src/teo_to
+sudo apt install cmake g++ qt6-base-dev       # Ubuntu / Debian
+cmake -S . -B build
+cmake --build build -j
+./build/src/sit_core                          # abre la aplicacion
+ctest --test-dir build --output-on-failure    # 7 pruebas
 ```
 
-## Controles de P1
+Windows / macOS: instalar Qt 6 y pasar `-DCMAKE_PREFIX_PATH=<ruta de Qt>` (o abrir en Qt Creator).
+Sin Qt, CMake compila solo el modelo y las pruebas que no usan interfaz.
 
-| Acción | Control |
+## Arquitectura (MVC)
+
+```
+ Vista (Qt)              Controlador                 Modelo (C++ puro, sin Qt)
+ MainWindow, MapView <-- SimulationController  <---- SimulationEngine (hilo propio)
+        |  acciones          |  slots/senales              |  Network, Route, Stop, Vehicle,
+        +------------------->+---------------------------->|  EventManager, IDispatchStrategy
+```
+
+El modelo corre en otro hilo y habla con la vista solo mediante `Snapshot` (copias de datos simples).
+
+## Cumplimiento de la consigna (estado Demo 1)
+
+| Requisito | Donde |
 |---|---|
-| Iniciar / pausar | Botón de la barra superior |
-| Reiniciar | Botón Reiniciar |
-| Velocidad | Selector 0.5x / 1x / 2x / 5x / 10x |
-| Cambiar al mapa esquemático | Interruptor Esquemático |
+| MVC | `model/` · `controller/` · `view/` |
+| Patron creacional | Factory Method (`VehicleFactory`, `StopFactory`, `TrafficEventFactory`) y Builder (`NetworkBuilder`) |
+| Patron estructural | Adapter (`CsvRouteAdapter` → `IRouteSource`) |
+| Otros patrones | Strategy (`IDispatchStrategy`), Observer (`SimulationEngine` → controlador) |
+| POO avanzada | herencia y polimorfismo (`Vehicle`, `Stop`, `TrafficEvent`), `unique_ptr`/`shared_ptr`/`weak_ptr`, plantilla `Repository<T>`, jerarquia de excepciones |
+| Lambdas | `sort`, `find_if`, `any_of`, `count_if` en `Network`, `EventManager`, `Repository` |
+| Sobrecarga de operadores | `Position` (`+ - == !=`, `<<`), `Stop::operator<`, `operator<<` de `Vehicle` |
+| Multihilo | `std::thread`, `std::mutex`, `std::atomic` en `SimulationEngine` |
+| Git y CMake | ramas por integrante + PR con revision; CMake con `file(GLOB)` para no pisar el CMake de otros |
+| Pruebas unitarias | `tests/` (CTest, 7 ejecutables) |
+| CI | `.github/workflows/ci.yml` |
 
-Los mensajes de Qt se escriben en `teo_to.log` dentro del directorio temporal del sistema.
+## Quien subio que
 
-## Estructura
-
-```text
-src/model/       Entidades de dominio y factoría de vehículos
-src/common/      Repository genérico
-src/viewmodel/   Objetos C++ expuestos a QML
-src/qml/         Vistas y componentes gráficos
-tests/           Pruebas unitarias del modelo y Repository
-```
-
-## Prototipos
-
-| Prototipo | Alcance | Estado |
-|---|---|---|
-| P1 | Mapa, ruta, paraderos y un bus | Completado |
-| P2 | Flota, demanda y controles ampliados | Pendiente |
-| P3 | Motor concurrente y dashboard | Pendiente |
-| P4 | Tráfico, incidentes y despacho | Pendiente |
-| P5 | JSON/CSV, pruebas completas y pulido | Pendiente |
-
-Ver [`requerimientos.md`](requerimientos.md) para la especificación y los criterios de
-aceptación. El borrador inicial está conservado en
-[`docs/archive/proyecto-borrador.md`](docs/archive/proyecto-borrador.md).
-
-## Flujo de trabajo del equipo
-
-- Usar ramas `feature/<nombre>` y Pull Requests hacia `main`, con al menos una revisión.
-- Mantener `main` compilable y ejecutar `ctest` antes de solicitar la integración.
-- Usar mensajes de commit en formato convencional, por ejemplo `feat: agrega ...`,
-  `fix: ...`, `test: ...` y `docs: ...`.
+Ver [`docs/DEMO1_SUBIDA.md`](docs/DEMO1_SUBIDA.md).
 
 ## Integrantes
 
-Retamozo Angel, Castillo Rodrigo, Estefanero Rodrigo, Mamani Renzo, Camani Ronald y
-Sarmiento Limberg.
+| Integrante | Codigo |
+|---|---|
+| Retamozo Calatayud Angel Julio | 202423334 |
+| Castillo Lazo Rodrigo Zara | 20210552 |
+| Estefanero Palma Rodrigo | 20243390 |
+| Mamani Quispe Renzo Geomar | 20243396 |
+| Camani Chambi Ronald Rodrigo | 20181697 |
+| Sarmiento Tico Limberg | 20243386 |
+
+Arequipa, 2026.
