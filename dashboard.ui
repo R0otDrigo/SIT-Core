@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>711</width>
-    <height>553</height>
+    <width>700</width>
+    <height>714</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,11 +22,11 @@
        <bold>true</bold>
       </font>
      </property>
-     <property name="alignment">
-      <set>Qt::AlignmentFlag::AlignCenter</set>
-     </property>
      <property name="text">
       <string>Dashboard</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignCenter</set>
      </property>
     </widget>
    </item>
@@ -37,11 +37,11 @@
        <pointsize>18</pointsize>
       </font>
      </property>
-     <property name="alignment">
-      <set>Qt::AlignmentFlag::AlignCenter</set>
-     </property>
      <property name="text">
       <string>Welcome</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignCenter</set>
      </property>
     </widget>
    </item>
