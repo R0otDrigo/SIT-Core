@@ -1,10 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
+project(SITCore VERSION 1.0.0 LANGUAGES CXX)
 
-project(TecnologiaObjetos VERSION 0.1 LANGUAGES CXX)
-
-set(CMAKE_AUTOMOC ON)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_AUTOUIC ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(Qt6 6.2 COMPONENTS Quick Widgets LinguistTools Network REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS LinguistTools)
@@ -42,13 +41,7 @@ qt_add_translations(appTecnologiaObjetos
         TecnologiaObjetos_ar_SA.ts
 )
 
-qt_add_qml_module(appTecnologiaObjetos
-    URI TecnologiaObjetos
-    VERSION 1.0
-    QML_FILES
-      main.qml
-      cargando.qml
-)
+add_subdirectory(src)
 
 # Adding a config.ini to firebaseauthmanager
 
@@ -86,3 +79,5 @@ include(GNUInstallDirs)
 install(TARGETS appTecnologiaObjetos
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+enable_testing()
+add_subdirectory(tests)

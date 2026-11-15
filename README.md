@@ -1,34 +1,78 @@
-# Avances:
+# SIT-Core — Demo 1
 
+**Simulador y gestor en tiempo real de una red de transporte publico urbano** (rutas troncales y
+alimentadoras de Arequipa). Proyecto final de Tecnologia de Objetos — UNSA, Arequipa 2026.
 
-1) Se puede hacer login hacia una base de datos 'Firebase'
-2) Los usuarios tienen 'dashboards' diferentes cada uno.
-3) Login sencillo de usuarios.
+![SIT-Core](docs/screenshot.png)
 
+## Que hace la Demo 1
 
-# Mejoras:
+- Mapa en vivo con 2 rutas **troncales** (T1, T2) y 2 **alimentadoras** (A1, A2), 15 paraderos.
+- 3 tipos de bus (convencional, articulado, alimentador) con distinta capacidad y velocidad.
+- Pasajeros que llegan segun la hora (horas punta 8:00 y 18:00); reloj simulado desde las 06:00.
+  Un paradero desbordado rechaza gente ("desistieron").
+- **Eventos de trafico** provocados a mano: accidente, obra vial (ruta lenta) y protesta (cierra un paradero).
+- **Controlador de flota**: despachar y retirar buses desde el panel; pausa y velocidad 1x–20x.
+- Indicadores en vivo y registro de eventos.
 
-1) Animaciónes de 'Loading ...' para cada registro.
-2) Escoger una paleta de colores del tema de la flota
-3) Logos y assets, puede ir despues, pero no al final.
+Llega en la **Demo 2**: despacho automatico por saturacion (2da estrategia), eventos aleatorios en un
+segundo hilo, adapter JSON + factory de fuentes, documentacion final (UML, informe, impacto social).
 
+## Compilar y ejecutar
 
-# Pendientes:
+Requisitos: CMake >= 3.16, compilador C++17 y Qt 6 (Widgets).
 
-1) Hacer el 'Dashboard' completo de cada tipo de usuario: y cambiar el nombre de los usuarios.
+```bash
+sudo apt install cmake g++ qt6-base-dev       # Ubuntu / Debian
+cmake -S . -B build
+cmake --build build -j
+./build/src/sit_core                          # abre la aplicacion
+ctest --test-dir build --output-on-failure    # 7 pruebas
+```
 
-administrador -> Renombrar a 'fleet_manager'
-guess -> ELIMINARLO EN PRODUCCION (Fase final) -> usenlo como pruebas para implementar funcionalidad de el 'fleet_manager' y otros
-user -> Son usuarios afiliados a la empresa, son los mismos conductores de unidades de la flota, simple dashboard con sus estadisticas de recorrido.
+Windows / macOS: instalar Qt 6 y pasar `-DCMAKE_PREFIX_PATH=<ruta de Qt>` (o abrir en Qt Creator).
+Sin Qt, CMake compila solo el modelo y las pruebas que no usan interfaz.
 
-USUARIOS POR AÑADIR:
+## Arquitectura (MVC)
 
-jefe_de_trafico -> Tarea de supervición y delegación de tareas, puede ser automatizado por un RPA o un AI en fase de pruebas.
+```
+ Vista (Qt)              Controlador                 Modelo (C++ puro, sin Qt)
+ MainWindow, MapView <-- SimulationController  <---- SimulationEngine (hilo propio)
+        |  acciones          |  slots/senales              |  Network, Route, Stop, Vehicle,
+        +------------------->+---------------------------->|  EventManager, IDispatchStrategy
+```
 
-responsable_de_desplazamientos -> Lo mismo, vela por los horarios, y asigna recursos.
+El modelo corre en otro hilo y habla con la vista solo mediante `Snapshot` (copias de datos simples).
 
+## Cumplimiento de la consigna (estado Demo 1)
 
+| Requisito | Donde |
+|---|---|
+| MVC | `model/` · `controller/` · `view/` |
+| Patron creacional | Factory Method (`VehicleFactory`, `StopFactory`, `TrafficEventFactory`) y Builder (`NetworkBuilder`) |
+| Patron estructural | Adapter (`CsvRouteAdapter` → `IRouteSource`) |
+| Otros patrones | Strategy (`IDispatchStrategy`), Observer (`SimulationEngine` → controlador) |
+| POO avanzada | herencia y polimorfismo (`Vehicle`, `Stop`, `TrafficEvent`), `unique_ptr`/`shared_ptr`/`weak_ptr`, plantilla `Repository<T>`, jerarquia de excepciones |
+| Lambdas | `sort`, `find_if`, `any_of`, `count_if` en `Network`, `EventManager`, `Repository` |
+| Sobrecarga de operadores | `Position` (`+ - == !=`, `<<`), `Stop::operator<`, `operator<<` de `Vehicle` |
+| Multihilo | `std::thread`, `std::mutex`, `std::atomic` en `SimulationEngine` |
+| Git y CMake | ramas por integrante + PR con revision; CMake con `file(GLOB)` para no pisar el CMake de otros |
+| Pruebas unitarias | `tests/` (CTest, 7 ejecutables) |
+| CI | `.github/workflows/ci.yml` |
 
+## Quien subio que
 
+Ver [`docs/DEMO1_SUBIDA.md`](docs/DEMO1_SUBIDA.md).
 
+## Integrantes
 
+| Integrante | Codigo |
+|---|---|
+| Retamozo Calatayud Angel Julio | 202423334 |
+| Castillo Lazo Rodrigo Zara | 20210552 |
+| Estefanero Palma Rodrigo | 20243390 |
+| Mamani Quispe Renzo Geomar | 20243396 |
+| Camani Chambi Ronald Rodrigo | 20181697 |
+| Sarmiento Tico Limberg | 20243386 |
+
+Arequipa, 2026.

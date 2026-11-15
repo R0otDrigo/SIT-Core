@@ -3,15 +3,14 @@
 
 #include "dashboard.h"
 
-class UserDashboard : public Dashboard
-{
-    Q_OBJECT
+class UserDashboard : public Dashboard {
+  Q_OBJECT
 public:
-    explicit UserDashboard(QWidget *parent = nullptr);
+  explicit UserDashboard(QWidget *parent = nullptr);
 
 protected:
-    QString dashboardTitle() const override;
-    QString welcomeMessage() const override;
+  QString dashboardTitle() const override;
+  QString welcomeMessage() const override;
 };
 
 #endif // USERDASHBOARD_H
