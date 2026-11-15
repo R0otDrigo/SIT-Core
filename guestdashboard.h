@@ -1,23 +1,17 @@
 #ifndef GUESTDASHBOARD_H
 #define GUESTDASHBOARD_H
 
-#include <QMainWindow>
-#include <QLabel>
+#include "dashboard.h"
 
-class QEvent;
-
-class GuestDashboard : public QMainWindow
+class GuestDashboard : public Dashboard
 {
     Q_OBJECT
 public:
     explicit GuestDashboard(QWidget *parent = nullptr);
-    void retranslate();
 
 protected:
-    void changeEvent(QEvent *event) override;
-
-private:
-    QLabel *m_welcomeLabel;
+    QString dashboardTitle() const override;
+    QString welcomeMessage() const override;
 };
 
 #endif // GUESTDASHBOARD_H

@@ -29,6 +29,9 @@ qt_add_executable(appTecnologiaObjetos
     mainwindow.h
     mainwindow.cpp
     mainwindow.ui
+    dashboard.cpp
+    dashboard.h
+    dashboard.ui
 )
 
 qt_add_translations(appTecnologiaObjetos

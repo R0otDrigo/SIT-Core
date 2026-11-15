@@ -20,6 +20,8 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow {
     Q_OBJECT
 public:
+
+    void setApiConfig(const QString &api, const QString &id);
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 

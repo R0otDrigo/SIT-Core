@@ -1,35 +1,17 @@
 #include "admindashboard.h"
-#include <QEvent>
-#include <QVBoxLayout>
-#include <QWidget>
 
 AdminDashboard::AdminDashboard(QWidget *parent)
-    : QMainWindow(parent)
-    , m_welcomeLabel(new QLabel(this))
+    : Dashboard(parent)
 {
-    setMinimumSize(800, 600);
-
-    QWidget *centralWidget = new QWidget(this);
-    QVBoxLayout *layout = new QVBoxLayout(centralWidget);
-    
-    m_welcomeLabel->setStyleSheet("font-size: 24px; font-weight: bold;");
-    layout->addWidget(m_welcomeLabel);
-    
-    centralWidget->setLayout(layout);
-    setCentralWidget(centralWidget);
-
     retranslate();
 }
 
-void AdminDashboard::retranslate()
+QString AdminDashboard::dashboardTitle() const
 {
-    setWindowTitle(tr("Admin Dashboard"));
-    m_welcomeLabel->setText(tr("Welcome Administrator"));
+    return tr("Admin Dashboard");
 }
 
-void AdminDashboard::changeEvent(QEvent *event)
+QString AdminDashboard::welcomeMessage() const
 {
-    if (event->type() == QEvent::LanguageChange)
-        retranslate();
-    QMainWindow::changeEvent(event);
+    return tr("Welcome Administrator");
 }

@@ -9,6 +9,7 @@
 #include <QApplication>
 #include <QLocale>
 #include <QSettings>
+#include <QVBoxLayout>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), stack(new QStackedWidget(this)),
@@ -23,8 +24,15 @@ MainWindow::MainWindow(QWidget *parent)
   stack->addWidget(userPage);  // índice 2
   stack->addWidget(guestPage); // índice 3
 
+  // stack->addWidget(centerContainer);
+
   setCentralWidget(stack);
   showPage(0); // Iniciar en Login
+
+  // La acción "User" (Logout) solo está disponible tras iniciar sesión
+  ui->menuLogout->menuAction()->setVisible(false);
+  connect(ui->actionLogout, &QAction::triggered, this,
+          &MainWindow::onLogoutRequested);
 
   // Conectar señales de las páginas
   connect(loginPage, &Login::loginSuccessful, this,
@@ -58,6 +66,11 @@ MainWindow::MainWindow(QWidget *parent)
   const QString savedLanguage = settings.value("language").toString();
   applyLanguage(savedLanguage.isEmpty() ? QLocale::system().name()
                                         : savedLanguage);
+}
+
+void MainWindow::setApiConfig(const QString &api_key, const QString &project_id){
+
+  loginPage->setFirebaseConfig(api_key, project_id);
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -111,10 +124,14 @@ void MainWindow::onLoginSuccessful(const QString &role) {
     showPage(3);
   else
     showPage(2);
+
+  // Mostrar el menú "User" con la acción de Logout una vez autenticado
+  ui->menuLogout->menuAction()->setVisible(true);
 }
 
 void MainWindow::onLogoutRequested() {
   showPage(0);
+  ui->menuLogout->menuAction()->setVisible(false);
   loginPage->reset(); // limpiar campos si es necesario
 }
 
