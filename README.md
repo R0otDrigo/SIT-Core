@@ -37,7 +37,7 @@ Sin Qt, CMake compila solo el modelo y las pruebas que no usan interfaz.
 
 ```
  Vista (Qt)              Controlador                 Modelo (C++ puro, sin Qt)
- MainWindow, MapView <-- SimulationController  <---- SimulationEngine (hilo propio)
+ SimulationWidget, MapView <-- SimulationController  <---- SimulationEngine (hilo propio)
         |  acciones          |  slots/senales              |  Network, Route, Stop, Vehicle,
         +------------------->+---------------------------->|  EventManager, IDispatchStrategy
 ```

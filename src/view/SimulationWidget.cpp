@@ -1,32 +1,30 @@
-#include "view/MainWindow.h"
+#include "view/SimulationWidget.h"
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QHeaderView>
-#include <QStatusBar>
 #include <QVBoxLayout>
 #include <algorithm>
 #include <vector>
 #include "model/TrafficEvent.h"
 #include "model/VehicleFactory.h"
 
-MainWindow::MainWindow(std::unique_ptr<sit::Network> network, QWidget* parent) : QMainWindow(parent) {
+SimulationWidget::SimulationWidget(std::unique_ptr<sit::Network> network, QWidget* parent) : QWidget(parent) {
     controller_ = new SimulationController(std::move(network), this);
     buildUi();
-    connect(controller_, &SimulationController::snapshotReady, this, &MainWindow::onSnapshot);
-    connect(controller_, &SimulationController::errorOccurred, this, &MainWindow::onError);
+    connect(controller_, &SimulationController::snapshotReady, this, &SimulationWidget::onSnapshot);
+    connect(controller_, &SimulationController::errorOccurred, this, &SimulationWidget::onError);
     controller_->start();
 }
 
-void MainWindow::buildUi() {
+void SimulationWidget::buildUi() {
     setWindowTitle("SIT-Core - Simulador de transporte publico (Arequipa)");
     resize(1320, 780);
     setStyleSheet(
         "QGroupBox{font-weight:bold;border:1px solid #cbd5e1;border-radius:6px;margin-top:10px;padding-top:6px;}"
         "QGroupBox::title{subcontrol-origin:margin;left:10px;padding:0 4px;}");
 
-    auto* central = new QWidget;
-    auto* root = new QHBoxLayout(central);
+    auto* root = new QHBoxLayout(this);
     map_ = new MapView;
     root->addWidget(map_, 1);
 
@@ -101,8 +99,6 @@ void MainWindow::buildUi() {
     col->addWidget(logList_);
 
     root->addWidget(side);
-    setCentralWidget(central);
-    statusBar()->showMessage("Listo");
 
     // --- Conexiones vista -> controlador ---
     connect(pauseButton_, &QPushButton::toggled, this, [this](bool paused) {
@@ -123,7 +119,7 @@ void MainWindow::buildUi() {
     controller_->setSpeed(speedCombo_->currentData().toDouble());
 }
 
-void MainWindow::populateRoutes(const sit::Snapshot& snap) {
+void SimulationWidget::populateRoutes(const sit::Snapshot& snap) {
     for (const auto& r : snap.routes) {
         const QString id = QString::fromStdString(r.id);
         routeIsTrunk_[id] = r.trunk;
@@ -132,7 +128,7 @@ void MainWindow::populateRoutes(const sit::Snapshot& snap) {
     routesLoaded_ = true;
 }
 
-void MainWindow::onRouteChanged() {
+void SimulationWidget::onRouteChanged() {
     // Solo se ofrecen los tipos de bus compatibles con la ruta elegida.
     vehicleTypeCombo_->clear();
     const auto it = routeIsTrunk_.find(routeCombo_->currentData().toString());
@@ -145,7 +141,7 @@ void MainWindow::onRouteChanged() {
         vehicleTypeCombo_->addItem(QString::fromStdString(sit::VehicleFactory::label(t)), static_cast<int>(t));
 }
 
-void MainWindow::onSnapshot(const sit::Snapshot& s) {
+void SimulationWidget::onSnapshot(const sit::Snapshot& s) {
     if (!routesLoaded_) populateRoutes(s);
     map_->refresh(s);
 
@@ -187,12 +183,11 @@ void MainWindow::onSnapshot(const sit::Snapshot& s) {
     for (const auto& line : s.log) addLog(QString::fromStdString(line));
 }
 
-void MainWindow::addLog(const QString& line) {
+void SimulationWidget::addLog(const QString& line) {
     logList_->insertItem(0, line);
     while (logList_->count() > 200) delete logList_->takeItem(logList_->count() - 1);
 }
 
-void MainWindow::onError(const QString& message) {
+void SimulationWidget::onError(const QString& message) {
     addLog("ERROR: " + message);
-    statusBar()->showMessage(message, 5000);
 }

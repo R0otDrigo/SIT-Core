@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <QString>
-#include "firebaseauthmanager.h"
+#include "controller/firebaseauthmanager.h"
 #include "signup.h"
 
 class QEvent;

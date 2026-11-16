@@ -3,13 +3,13 @@
 #include <QTimer>
 #include "check.h"
 #include "common/Exceptions.h"
-#include "view/MainWindow.h"
+#include "view/SimulationWidget.h"
 
 int main(int argc, char** argv) {
     QApplication app(argc, argv);
 
     auto net = SimulationController::loadNetwork(QString(SIT_DATA_DIR) + "/network.csv");
-    MainWindow window(std::move(net));
+    SimulationWidget window(std::move(net));
     window.show();
 
     // Dejamos correr el event loop: los snapshots del hilo de simulacion llegan encolados.

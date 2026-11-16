@@ -2,7 +2,7 @@
 #define SIGNUP_H
 
 #include <QWidget>
-#include "firebaseauthmanager.h"
+#include "controller/firebaseauthmanager.h"
 
 class QCloseEvent;
 class QEvent;

@@ -3,20 +3,21 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QListWidget>
-#include <QMainWindow>
 #include <QPushButton>
 #include <QTableWidget>
+#include <QWidget>
 #include <map>
 #include <memory>
 #include "controller/SimulationController.h"
 #include "view/MapView.h"
 
-// Vista principal: mapa + panel de control del "controlador de flota". Solo muestra datos
-// (Snapshot) y reenvia las acciones del usuario al SimulationController.
-class MainWindow : public QMainWindow {
+// Vista de la simulacion: mapa + panel de control del "controlador de flota". Es un QWidget
+// hijo para poder incrustarse dentro de UserDashboard. Solo muestra datos (Snapshot) y reenvia
+// las acciones del usuario al SimulationController.
+class SimulationWidget : public QWidget {
     Q_OBJECT
 public:
-    explicit MainWindow(std::unique_ptr<sit::Network> network, QWidget* parent = nullptr);
+    explicit SimulationWidget(std::unique_ptr<sit::Network> network, QWidget* parent = nullptr);
 
     SimulationController* controller() const { return controller_; }
     QTableWidget* stopsTable() const { return stopsTable_; }
