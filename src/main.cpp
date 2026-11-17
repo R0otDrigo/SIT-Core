@@ -1,6 +1,9 @@
 #include <QApplication>
+#include <QGuiApplication>
+#include <QQuickView>
 #include <QSettings>
 #include <QDebug>
+#include <QUrl>
 
 #include "view/mainwindow.h"
 
@@ -20,5 +23,12 @@ int main(int argc, char *argv[]) {
     MainWindow w;
     w.setApiConfig(apiKey, projectId);
     w.show();
+
+    QQuickView view;
+
+    const QUrl url(u"view/openstreetmaps.qml"_qs);
+    view.setSource(url);
+
+    view.show();
     return a.exec();
 }

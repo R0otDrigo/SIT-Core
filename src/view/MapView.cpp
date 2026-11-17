@@ -1,10 +1,14 @@
-#include "view/MapView.h"
+#include "MapView.h"
+
+
+
+#include "ui_MapView.h"
 #include <QBrush>
 #include <QFont>
+#include <QLineF>
 #include <QPainter>
 #include <QPen>
 #include <QSet>
-#include <QLineF>
 #include <algorithm>
 #include <vector>
 
@@ -19,11 +23,17 @@ QColor saturationColor(double s, bool closed) {
 
 } // namespace
 
-MapView::MapView(QWidget* parent) : QGraphicsView(parent) {
+MapView::MapView(QWidget* parent)
+    : QGraphicsView(parent)
+    , ui(new Ui::MapView)
+{
+    ui->setupUi(this);
     setScene(&scene_);
-    setRenderHint(QPainter::Antialiasing);
-    setBackgroundBrush(QColor("#f1f5f9"));
-    setFrameShape(QFrame::NoFrame);
+}
+
+MapView::~MapView()
+{
+    delete ui;
 }
 
 void MapView::build(const sit::Snapshot& snap) {

@@ -1,96 +1,88 @@
 #include "signup.h"
 #include "ui_signup.h"
 
+#include "string"
 #include <QCloseEvent>
 #include <QEvent>
 #include <iostream>
-#include "string"
+#include <qnamespace.h>
 
-SignUp::SignUp(QWidget *parent)
-    : QWidget(parent)
-    , ui(new Ui::SignUp)
-{
-    ui->setupUi(this);
+SignUp::SignUp(QWidget *parent) : QWidget(parent), ui(new Ui::SignUp) {
+  ui->setupUi(this);
 
-    connect(ui->confirmButton, &QPushButton::clicked, this, &SignUp::onSignUpClicked);
-    // connect(m_authManager, &FirebaseAuthManager::signUpSucceeded, this, &SignUp::onSignUpSuccess);
-    // connect(m_authManager, &FirebaseAuthManager::signUpFailed, this, &SignUp::onSignUpFailed);
+  connect(ui->confirmButton, &QPushButton::clicked, this,
+          &SignUp::onSignUpClicked);
+  // connect(m_authManager, &FirebaseAuthManager::signUpSucceeded, this,
+  // &SignUp::onSignUpSuccess); connect(m_authManager,
+  // &FirebaseAuthManager::signUpFailed, this, &SignUp::onSignUpFailed);
 }
 
-
-void SignUp::setFirebaseConfig(const QString &apiKey, const QString &projectId)
-{
-    m_authManager->setApiKey(apiKey);
-    m_authManager->setProjectId(projectId);
+void SignUp::setFirebaseConfig(const QString &apiKey,
+                               const QString &projectId) {
+  m_authManager->setApiKey(apiKey);
+  m_authManager->setProjectId(projectId);
 }
 
-void SignUp::setFirebaseAuthManager(FirebaseAuthManager *reference){
-    if (m_authManager == reference) return; // Evitar reconectar si es el mismo
+void SignUp::setFirebaseAuthManager(FirebaseAuthManager *reference) {
+  if (m_authManager == reference)
+    return; // Evitar reconectar si es el mismo
 
-    m_authManager = reference;
+  m_authManager = reference;
 
-    if (m_authManager) {
-        // Usamos Qt::UniqueConnection para evitar que la señal se dispare 2 veces
-        connect(m_authManager, &FirebaseAuthManager::signUpSucceeded,
-                this, &SignUp::onSignUpSuccess, Qt::UniqueConnection);
-        connect(m_authManager, &FirebaseAuthManager::signUpFailed,
-                this, &SignUp::onSignUpFailed, Qt::UniqueConnection);
-    }
+  if (m_authManager) {
+    // Usamos Qt::UniqueConnection para evitar que la señal se dispare 2 veces
+    connect(m_authManager, &FirebaseAuthManager::signUpSucceeded, this,
+            &SignUp::onSignUpSuccess, Qt::UniqueConnection);
+    connect(m_authManager, &FirebaseAuthManager::signUpFailed, this,
+            &SignUp::onSignUpFailed, Qt::UniqueConnection);
+  }
 }
 
-void SignUp::closeEvent(QCloseEvent *event)
-{
-    QWidget::closeEvent(event);
-    emit closed();
+void SignUp::closeEvent(QCloseEvent *event) {
+  QWidget::closeEvent(event);
+  emit closed();
 }
 
-void SignUp::changeEvent(QEvent *event)
-{
-    if (event->type() == QEvent::LanguageChange)
-        retranslate();
-    QWidget::changeEvent(event);
+void SignUp::changeEvent(QEvent *event) {
+  if (event->type() == QEvent::LanguageChange)
+    retranslate();
+  QWidget::changeEvent(event);
 }
 
-void SignUp::retranslate()
-{
-    ui->retranslateUi(this);
+void SignUp::retranslate() { ui->retranslateUi(this); }
+
+void SignUp::onSignUpClicked() {
+  QString email = ui->correoElectronicoLineEdit->text().trimmed();
+  QString password = ui->contraseALineEdit->text();
+  QString role = ui->rolComboBox->currentText();
+
+  if (email.isEmpty() || password.isEmpty()) {
+    ui->info->setText(tr("Por favor, insertar correo y contraseña"));
+    return;
+  }
+
+  ui->info->setText(tr("Registrando..."));
+  ui->confirmButton->setEnabled(false);
+  m_authManager->signUp(email, password, role);
 }
 
-void SignUp::onSignUpClicked()
-{
-    QString email = ui->correoElectronicoLineEdit->text().trimmed();
-    QString password = ui->contraseALineEdit->text();
-    QString role = ui->rolComboBox->currentText();
+void SignUp::onSignUpSuccess() {
+  ui->confirmButton->setEnabled(true);
+  ui->info->setText(tr("Registro Completado"));
 
-    if (email.isEmpty() || password.isEmpty()) {
-        ui->info->setText(tr("Por favor, insertar correo y contraseña"));
-        return;
-    }
+  this->hide();
 
-    ui->info->setText(tr("Registrando..."));
-    ui->confirmButton->setEnabled(false);
-    m_authManager->signUp(email, password, role);
+  std::cout << "En teoria si se registró correctamente" << std::endl;
 }
 
-void SignUp::onSignUpSuccess()
-{
-    ui->confirmButton->setEnabled(true);
-    ui->info->setText(tr("Registro Completado"));
+void SignUp::onSignUpFailed(const QString &error) {
+  ui->confirmButton->setEnabled(true);
 
-    this->hide();
-
-    std::cout << "En teoria si se registró correctamente" << std::endl;
+  ui->info->setText("Error: " + error);
+  if (error == nullptr) {
+    ui->info->setText("Error: Sin connección a interned");
+  }
+  std::cout << qPrintable(error) << std::endl;
 }
 
-void SignUp::onSignUpFailed(const QString &error)
-{
-    ui->confirmButton->setEnabled(true);
-    ui->info->setText("Error: " + error);
-    std::cout << qPrintable(error) << std::endl;
-}
-
-
-SignUp::~SignUp()
-{
-    delete ui;
-}
+SignUp::~SignUp() { delete ui; }

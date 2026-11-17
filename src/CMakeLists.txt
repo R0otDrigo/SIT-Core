@@ -20,12 +20,16 @@ if(Qt6_FOUND AND SIT_UI_SOURCES AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
   set(CMAKE_AUTOUIC ON)
   add_library(sit_ui STATIC ${SIT_UI_SOURCES})
   target_include_directories(sit_ui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-  target_link_libraries(sit_ui PUBLIC sit_model Qt6::Widgets Qt6::Network)
+  target_link_libraries(sit_ui PUBLIC sit_model Qt6::Widgets Qt6::Network Qt6::Quick)
   target_compile_definitions(sit_ui PRIVATE SIT_DATA_DIR="${PROJECT_SOURCE_DIR}/data")
 
-  add_executable(sit_core main.cpp)
+  add_executable(sit_core main.cpp
+    interactive.qrc
+    map.qml
+  )
   target_link_libraries(sit_core PRIVATE sit_ui)
   target_compile_definitions(sit_core PRIVATE SIT_DATA_DIR="${PROJECT_SOURCE_DIR}/data")
+
 
   # Traducciones: se incrustan como recurso :/i18n/... y se cargan en tiempo de ejecucion.
   qt_add_translations(sit_core
