@@ -19,7 +19,7 @@ std::unique_ptr<Network> NetworkBuilder::build() const {
     std::set<std::string> seen;
     for (const auto& s : data_.stops) {
         if (!seen.insert(s.id).second) throw DataLoadException("paradero repetido: " + s.id);
-        net->addStop(StopFactory::create(s.type, s.id, s.name, Position{s.x, s.y}, s.capacity));
+        net->addStop(StopFactory::create(s.type, s.id, s.name, Position{s.x, s.y}, s.capacity, s.geo));
     }
 
     seen.clear();
@@ -34,6 +34,9 @@ std::unique_ptr<Network> NetworkBuilder::build() const {
         }
         net->addRoute(route);
     }
+
+    // Georreferencia: calibra x/y -> lat/lon y completa paraderos sin coordenadas.
+    net->calibrateGeo();
 
     for (const auto& f : data_.fleet)
         net->addVehicle(VehicleFactory::parse(f.vehicleType), f.routeId, f.startIndex);

@@ -1,14 +1,13 @@
 #include <QApplication>
-#include <QGuiApplication>
-#include <QQuickView>
 #include <QSettings>
 #include <QDebug>
-#include <QUrl>
-#include <QQmlApplicationEngine>
 
 #include "view/mainwindow.h"
 
 int main(int argc, char *argv[]) {
+    // QQuickWidget comparte contextos OpenGL con la ventana principal.
+    QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+
     QApplication a(argc, argv);
     QCoreApplication::setOrganizationName("TecnologiaObjetos");
     QCoreApplication::setApplicationName("appTecnologiaObjetos");
@@ -24,15 +23,6 @@ int main(int argc, char *argv[]) {
     MainWindow w;
     w.setApiConfig(apiKey, projectId);
     w.show();
-
-    QQmlApplicationEngine engine;
-    // Load the QML file from the resource system
-    const QUrl url = QUrl("qrc:/traficMap.qml");
-
-    QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed,
-                     &a, []() { QCoreApplication::exit(-1); },
-                     Qt::QueuedConnection);
-    engine.load(url);
 
     return a.exec();
 }

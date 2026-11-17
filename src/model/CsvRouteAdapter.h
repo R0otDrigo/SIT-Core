@@ -7,7 +7,7 @@ namespace sit {
 
 // Adapter: convierte un archivo de texto CSV (adaptado) a la interfaz IRouteSource.
 //   LIMIT,10
-//   STOP,id,nombre,tipo,x,y,capacidad
+//   STOP,id,nombre,tipo,x,y,capacidad[,lat,lon]   (lat/lon opcionales)
 //   ROUTE,id,nombre,tipo,#color,id1;id2;id3
 //   FLEET,idRuta,tipoBus,indiceInicial
 class CsvRouteAdapter : public IRouteSource {

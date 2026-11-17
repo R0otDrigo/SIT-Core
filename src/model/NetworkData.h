@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "common/GeoCoordinate.h"
 
 namespace sit {
 
@@ -9,6 +10,7 @@ struct StopData {
     std::string id, name, type;     // type: regular | terminal | transfer
     double x{}, y{};
     int capacity{80};
+    GeoCoordinate geo;              // opcional: si falta, Network la proyecta desde x/y
 };
 
 struct RouteData {

@@ -30,10 +30,13 @@ double Stop::saturation() const {
 }
 
 std::shared_ptr<Stop> StopFactory::create(const std::string& type, std::string id, std::string name,
-                                          Position pos, int maxWaiting) {
-    if (type == "regular")  return std::make_shared<RegularStop>(std::move(id), std::move(name), pos, maxWaiting);
-    if (type == "terminal") return std::make_shared<Terminal>(std::move(id), std::move(name), pos, maxWaiting);
-    if (type == "transfer") return std::make_shared<TransferStation>(std::move(id), std::move(name), pos, maxWaiting);
+                                          Position pos, int maxWaiting, GeoCoordinate geo) {
+    if (type == "regular")
+        return std::make_shared<RegularStop>(std::move(id), std::move(name), pos, maxWaiting, geo);
+    if (type == "terminal")
+        return std::make_shared<Terminal>(std::move(id), std::move(name), pos, maxWaiting, geo);
+    if (type == "transfer")
+        return std::make_shared<TransferStation>(std::move(id), std::move(name), pos, maxWaiting, geo);
     throw DataLoadException("tipo de paradero desconocido: " + type);
 }
 

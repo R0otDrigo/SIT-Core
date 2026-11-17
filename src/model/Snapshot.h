@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "common/GeoCoordinate.h"
 
 namespace sit {
 
@@ -12,6 +13,7 @@ struct VehicleView {
     std::string type;
     std::string routeId;
     double x{}, y{};
+    GeoCoordinate geo;
     int passengers{};
     int capacity{};
     bool dwelling{};
@@ -21,6 +23,7 @@ struct StopView {
     std::string id;
     std::string name;
     double x{}, y{};
+    GeoCoordinate geo;
     int waiting{};
     double saturation{};
     bool closed{};
@@ -32,6 +35,7 @@ struct RouteView {
     std::string color;
     bool trunk{};
     std::vector<std::string> stopIds;
+    std::vector<GeoCoordinate> waypoints;
 };
 
 struct EventView {

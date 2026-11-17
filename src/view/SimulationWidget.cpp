@@ -3,14 +3,22 @@
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QQuickWidget>
+#include <QQmlContext>
+#include <QQmlError>
+#include <QStringList>
+#include <QUrl>
 #include <QVBoxLayout>
 #include <algorithm>
 #include <vector>
 #include "model/TrafficEvent.h"
 #include "model/VehicleFactory.h"
+#include "view/MapBridge.h"
 
 SimulationWidget::SimulationWidget(std::unique_ptr<sit::Network> network, QWidget* parent) : QWidget(parent) {
     controller_ = new SimulationController(std::move(network), this);
+    mapBridge_ = new MapBridge(this);
+    mapBridge_->loadGtfs();
     buildUi();
     connect(controller_, &SimulationController::snapshotReady, this, &SimulationWidget::onSnapshot);
     connect(controller_, &SimulationController::errorOccurred, this, &SimulationWidget::onError);
@@ -25,7 +33,11 @@ void SimulationWidget::buildUi() {
         "QGroupBox::title{subcontrol-origin:margin;left:10px;padding:0 4px;}");
 
     auto* root = new QHBoxLayout(this);
-    map_ = new MapView;
+    map_ = new QQuickWidget;
+    map_->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    map_->setClearColor(QColor("#e8eef5"));
+    map_->setMinimumSize(480, 360);
+    map_->rootContext()->setContextProperty("mapBridge", mapBridge_);
     root->addWidget(map_, 1);
 
     auto* side = new QWidget;
@@ -116,6 +128,14 @@ void SimulationWidget::buildUi() {
         controller_->triggerEvent(eventCombo_->currentData().toInt(), routeCombo_->currentData().toString());
     });
 
+    connect(map_, &QQuickWidget::statusChanged, this, [this](QQuickWidget::Status status) {
+        if (status != QQuickWidget::Error) return;
+        QStringList messages;
+        for (const QQmlError& error : map_->errors()) messages << error.toString();
+        addLog("ERROR mapa QML: " + messages.join(" | "));
+    });
+    map_->setSource(QUrl(QStringLiteral("qrc:/qml/SimulationMap.qml")));
+
     controller_->setSpeed(speedCombo_->currentData().toDouble());
 }
 
@@ -143,7 +163,7 @@ void SimulationWidget::onRouteChanged() {
 
 void SimulationWidget::onSnapshot(const sit::Snapshot& s) {
     if (!routesLoaded_) populateRoutes(s);
-    map_->refresh(s);
+    mapBridge_->update(s);
 
     clockLabel_->setText(QString("Hora simulada %1%2").arg(QString::fromStdString(s.clock), s.paused ? "  (pausa)" : ""));
     busesLabel_->setText(QString("%1 / %2").arg(s.stats.activeVehicles).arg(s.stats.fleetLimit));
@@ -184,6 +204,7 @@ void SimulationWidget::onSnapshot(const sit::Snapshot& s) {
 }
 
 void SimulationWidget::addLog(const QString& line) {
+    if (!logList_) return;
     logList_->insertItem(0, line);
     while (logList_->count() > 200) delete logList_->takeItem(logList_->count() - 1);
 }

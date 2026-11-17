@@ -2,7 +2,9 @@
 #include <memory>
 #include <random>
 #include <string>
+#include <utility>
 #include <vector>
+#include "common/GeoCoordinate.h"
 #include "common/Repository.h"
 #include "model/Route.h"
 #include "model/EventManager.h"
@@ -54,10 +56,24 @@ public:
     std::vector<std::string> drainLog();
     Snapshot snapshot() const;
 
+    // Georreferenciacion: calibra x/y -> lat/lon con los paraderos que ya traen coordenadas
+    // y completa los que no las tengan. Es idempotente; NetworkBuilder la llama al armar la red.
+    void calibrateGeo();
+    GeoCoordinate geoFor(const Position& p) const;
+    std::pair<GeoCoordinate, GeoCoordinate> geoBounds() const;   // (min, max)
+    GeoCoordinate geoCenter() const;
+
     static bool compatible(VehicleType type, RouteKind kind);
 
 private:
     void serve(Vehicle& v);                     // atiende al bus en el paradero actual
+
+    struct GeoCalibration {
+        bool lonReady{false}, latReady{false};
+        double meanX{0.0}, meanY{0.0};
+        double slopeLon{0.0}, interceptLon{0.0};   // lon = interceptLon + slopeLon * x
+        double slopeLat{0.0}, interceptLat{0.0};   // lat = interceptLat + slopeLat * y
+    };
 
     Repository<Stop> stops_;
     Repository<Route> routes_;
@@ -70,6 +86,7 @@ private:
     double simTime_{0.0};
     long long transported_{0};
     long long abandoned_{0};
+    GeoCalibration calibration_;
 };
 
 } // namespace sit

@@ -14,6 +14,8 @@ int main() {
     CHECK(data.routes.size() == 4);
     CHECK(data.fleet.size() == 6);
     CHECK(data.fleetLimit == 10);
+    CHECK(data.stops.front().geo.isValid());
+    CHECK(data.stops.front().geo.latitude < -16.0 && data.stops.front().geo.latitude > -17.0);
 
     // Builder arma la red completa.
     auto net = NetworkBuilder().withSeed(7).withData(data).build();
@@ -30,6 +32,8 @@ int main() {
     CHECK_THROWS(CsvRouteAdapter::parse(badNumber), DataLoadException);
     std::istringstream badRecord("HOLA,1,2\n");
     CHECK_THROWS(CsvRouteAdapter::parse(badRecord), DataLoadException);
+    std::istringstream badGeo("STOP,A,A,regular,0,0,10,999,0\n");
+    CHECK_THROWS(CsvRouteAdapter::parse(badGeo), DataLoadException);
 
     NetworkData bad = data;
     bad.routes[0].stops.push_back("XXX");

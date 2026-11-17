@@ -17,6 +17,7 @@ static std::unique_ptr<Network> makeNet() {
     f->addStop(c); f->addStop(b);
     net->addRoute(t); net->addRoute(f);
     net->setFleetLimit(2);
+    net->calibrateGeo();
     return net;
 }
 
@@ -64,6 +65,11 @@ int main() {
 
     auto snap = net->snapshot();
     CHECK(snap.stops.size() == 3 && snap.routes.size() == 2 && snap.vehicles.size() == 2);
+    CHECK(snap.stops.front().geo.isValid());
+    CHECK(snap.routes.front().waypoints.size() == 3);
+    CHECK(snap.vehicles.front().geo.isValid());
+    CHECK(net->geoBounds().first.isValid());
+    CHECK(net->geoCenter().isValid());
 
     // Dejamos buses vacios para poder retirarlos.
     for (auto& v : net->vehicles()) v->alight(1000);

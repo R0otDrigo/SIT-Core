@@ -12,21 +12,20 @@ target_link_libraries(sit_model PUBLIC Threads::Threads)
 # Controlador + vistas + autenticacion + aplicacion: solo si Qt6 esta instalado.
 # El .ui de cada vista se procesa con AUTOUIC y los Q_OBJECT con AUTOMOC.
 # ---------------------------------------------------------------------------
-find_package(Qt6 COMPONENTS Widgets Network Location QUIET)
+find_package(Qt6 COMPONENTS Widgets Network Quick QuickWidgets Qml Positioning Location QUIET)
 file(GLOB SIT_UI_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/controller/*.cpp
                                             ${CMAKE_CURRENT_SOURCE_DIR}/view/*.cpp)
 if(Qt6_FOUND AND SIT_UI_SOURCES AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
   set(CMAKE_AUTOMOC ON)
   set(CMAKE_AUTOUIC ON)
   set(CMAKE_AUTORCC ON)
-  add_library(sit_ui STATIC ${SIT_UI_SOURCES})
+  add_library(sit_ui STATIC ${SIT_UI_SOURCES} qml/qml.qrc)
   target_include_directories(sit_ui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-  target_link_libraries(sit_ui PUBLIC sit_model Qt6::Widgets Qt6::Network Qt6::Quick Qt6::Location)
+  target_link_libraries(sit_ui PUBLIC sit_model Qt6::Widgets Qt6::Network Qt6::Quick
+                                        Qt6::QuickWidgets Qt6::Qml Qt6::Positioning Qt6::Location)
   target_compile_definitions(sit_ui PRIVATE SIT_DATA_DIR="${PROJECT_SOURCE_DIR}/data")
 
-  add_executable(sit_core main.cpp
-    interactive.qrc
-  )
+  add_executable(sit_core main.cpp)
   target_link_libraries(sit_core PRIVATE sit_ui)
   target_compile_definitions(sit_core PRIVATE SIT_DATA_DIR="${PROJECT_SOURCE_DIR}/data")
 

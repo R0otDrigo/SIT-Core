@@ -7,7 +7,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 6.2 COMPONENTS Quick Widgets LinguistTools Network REQUIRED)
+find_package(Qt6 6.2 COMPONENTS Quick QuickWidgets Qml Widgets LinguistTools Network Positioning Location REQUIRED)
 
 enable_testing()
 add_subdirectory(src)

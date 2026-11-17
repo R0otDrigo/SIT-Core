@@ -1,5 +1,6 @@
 // Prueba de humo de controlador + vista (se ejecuta con QT_QPA_PLATFORM=offscreen).
 #include <QApplication>
+#include <QQuickWidget>
 #include <QTimer>
 #include "check.h"
 #include "common/Exceptions.h"
@@ -20,6 +21,9 @@ int main(int argc, char** argv) {
 
     CHECK(snapshots > 3);
     CHECK(window.stopsTable()->rowCount() == 15);
+    CHECK(window.mapWidget() != nullptr);
+    CHECK(window.mapWidget()->status() == QQuickWidget::Ready);
+    CHECK(window.mapWidget()->errors().isEmpty());
 
     // Un error del modelo llega a la vista como senal, sin romper nada.
     int errors = 0;

@@ -5,9 +5,106 @@
 #include "common/Exceptions.h"
 
 namespace sit {
+namespace {
+
+// Proyeccion local de respaldo (centro de Arequipa) para redes antiguas sin lat/lon.
+constexpr double fallbackOriginLat = -16.3989;
+constexpr double fallbackOriginLon = -71.5369;
+constexpr double fallbackMetersPerUnit = 8.0;
+constexpr double metersPerDegreeLat = 111320.0;
+
+GeoCoordinate fallbackProject(const Position& p) {
+    const double metersPerDegreeLon =
+        metersPerDegreeLat * std::cos(fallbackOriginLat * 3.14159265358979323846 / 180.0);
+    return {fallbackOriginLat - p.y * fallbackMetersPerUnit / metersPerDegreeLat,
+            fallbackOriginLon + p.x * fallbackMetersPerUnit / metersPerDegreeLon};
+}
+
+} // namespace
 
 bool Network::compatible(VehicleType type, RouteKind kind) {
     return (type == VehicleType::Feeder) == (kind == RouteKind::Feeder);
+}
+
+void Network::calibrateGeo() {
+    std::vector<const Stop*> geoStops;
+    for (const auto& stop : stops_.all())
+        if (stop->hasGeo()) geoStops.push_back(stop.get());
+
+    double meanX = 0.0, meanY = 0.0, meanLat = 0.0, meanLon = 0.0;
+    if (!geoStops.empty()) {
+        for (const Stop* s : geoStops) {
+            meanX += s->position().x;
+            meanY += s->position().y;
+            meanLat += s->geoPosition().latitude;
+            meanLon += s->geoPosition().longitude;
+        }
+        const double n = static_cast<double>(geoStops.size());
+        meanX /= n; meanY /= n; meanLat /= n; meanLon /= n;
+    }
+
+    double sxx = 0.0, syy = 0.0, sxLon = 0.0, syLat = 0.0;
+    for (const Stop* s : geoStops) {
+        const double dx = s->position().x - meanX;
+        const double dy = s->position().y - meanY;
+        sxx += dx * dx;
+        syy += dy * dy;
+        sxLon += dx * (s->geoPosition().longitude - meanLon);
+        syLat += dy * (s->geoPosition().latitude - meanLat);
+    }
+
+    calibration_ = GeoCalibration{};
+    calibration_.meanX = meanX;
+    calibration_.meanY = meanY;
+
+    if (sxx > 1e-9) {
+        calibration_.slopeLon = sxLon / sxx;
+        calibration_.interceptLon = meanLon - calibration_.slopeLon * meanX;
+        calibration_.lonReady = std::isfinite(calibration_.slopeLon);
+    }
+    if (syy > 1e-9) {
+        calibration_.slopeLat = syLat / syy;
+        calibration_.interceptLat = meanLat - calibration_.slopeLat * meanY;
+        calibration_.latReady = std::isfinite(calibration_.slopeLat);
+    }
+
+    // Completa paraderos sin coordenadas usando la calibracion o la proyeccion de respaldo.
+    for (const auto& stop : stops_.all())
+        if (!stop->hasGeo()) stop->setGeoPosition(geoFor(stop->position()));
+}
+
+GeoCoordinate Network::geoFor(const Position& p) const {
+    if (!calibration_.lonReady && !calibration_.latReady) return fallbackProject(p);
+
+    const GeoCoordinate fallback = fallbackProject(p);
+    GeoCoordinate out = fallback;
+    if (calibration_.lonReady)
+        out.longitude = calibration_.interceptLon + calibration_.slopeLon * p.x;
+    if (calibration_.latReady)
+        out.latitude = calibration_.interceptLat + calibration_.slopeLat * p.y;
+    return out.isValid() ? out : fallback;
+}
+
+std::pair<GeoCoordinate, GeoCoordinate> Network::geoBounds() const {
+    GeoCoordinate min{90.0, 180.0};
+    GeoCoordinate max{-90.0, -180.0};
+    bool any = false;
+    for (const auto& stop : stops_.all()) {
+        if (!stop->hasGeo()) continue;
+        any = true;
+        min.latitude = std::min(min.latitude, stop->geoPosition().latitude);
+        min.longitude = std::min(min.longitude, stop->geoPosition().longitude);
+        max.latitude = std::max(max.latitude, stop->geoPosition().latitude);
+        max.longitude = std::max(max.longitude, stop->geoPosition().longitude);
+    }
+    if (!any) return {GeoCoordinate{}, GeoCoordinate{}};
+    return {min, max};
+}
+
+GeoCoordinate Network::geoCenter() const {
+    const auto [min, max] = geoBounds();
+    if (!min.isValid() || !max.isValid()) return {};
+    return {(min.latitude + max.latitude) / 2.0, (min.longitude + max.longitude) / 2.0};
 }
 
 Vehicle& Network::addVehicle(VehicleType type, const std::string& routeId, std::size_t startIndex) {
@@ -142,6 +239,7 @@ Snapshot Network::snapshot() const {
         StopView v;
         v.id = st->id(); v.name = st->name();
         v.x = st->position().x; v.y = st->position().y;
+        v.geo = st->geoPosition();
         v.waiting = st->waiting(); v.saturation = st->saturation();
         v.closed = isStopClosed(*st);
         satSum += st->saturation();
@@ -152,6 +250,7 @@ Snapshot Network::snapshot() const {
         v.id = r->id(); v.name = r->name(); v.color = r->color();
         v.trunk = r->kind() == RouteKind::Trunk;
         for (const auto& st : r->stops()) v.stopIds.push_back(st->id());
+        v.waypoints = r->waypoints();
         s.routes.push_back(std::move(v));
     }
     for (const auto& b : vehicles_) {
@@ -160,6 +259,7 @@ Snapshot Network::snapshot() const {
         auto r = b->route();
         v.routeId = r ? r->id() : "";
         v.x = b->position().x; v.y = b->position().y;
+        v.geo = geoFor(b->position());
         v.passengers = b->passengers(); v.capacity = b->capacity();
         v.dwelling = b->state() == VehicleState::Dwelling;
         s.vehicles.push_back(std::move(v));

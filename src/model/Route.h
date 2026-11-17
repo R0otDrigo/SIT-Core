@@ -25,6 +25,10 @@ public:
     std::size_t size() const { return stops_.size(); }
 
     double length() const;
+    // Trazado geografico ordenado que consume la vista QML (RouteQuery / MapPolyline).
+    std::vector<GeoCoordinate> waypoints() const;
+    bool hasGeo() const;
+    double geoLength() const;      // metros aproximados sobre el trazado geo
 
 private:
     std::string id_;
