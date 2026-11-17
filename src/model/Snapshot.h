@@ -11,6 +11,7 @@ struct VehicleView {
     int id{};
     std::string type;
     std::string routeId;
+    std::string nextStopName;
     double x{}, y{};
     int passengers{};
     int capacity{};

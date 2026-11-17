@@ -18,15 +18,17 @@ int main(int argc, char** argv) {
     auto* passengers = window.findChild<QLabel*>("busPassengersLabel");
     auto* freeSeats = window.findChild<QLabel*>("busFreeSeatsLabel");
     auto* occupancy = window.findChild<QProgressBar*>("busOccupancyBar");
-    CHECK(map && panel && details && passengers && freeSeats && occupancy);
+    auto* nextStop = window.findChild<QLabel*>("busNextStopLabel");
+    CHECK(map && panel && details && passengers && freeSeats && occupancy && nextStop);
     CHECK(details->isHidden());
 
-    map->busClicked(7, "Articulado", "T1 - Troncal", 23, 160, true);
+    map->busClicked(7, "Articulado", "T1 - Troncal", 23, 160, true, "Centro");
     CHECK(panel->title() == "Bus #7");
     CHECK(!details->isHidden());
     CHECK(passengers->text() == "23 / 160");
     CHECK(freeSeats->text() == "137");
     CHECK(occupancy->value() == 14);
+    CHECK(nextStop->text() == "Centro");
 
     sit::Snapshot snapshot;
     snapshot.clock = "08:00";
@@ -36,6 +38,7 @@ int main(int argc, char** argv) {
     bus.routeId = "T1";
     bus.passengers = 80;
     bus.capacity = 160;
+    bus.nextStopName = "Terminal";
     snapshot.vehicles.push_back(bus);
     sit::RouteView route;
     route.id = "T1";
@@ -46,6 +49,7 @@ int main(int argc, char** argv) {
     CHECK(passengers->text() == "80 / 160");
     CHECK(freeSeats->text() == "80");
     CHECK(occupancy->value() == 50);
+    CHECK(nextStop->text() == "Terminal");
 
     snapshot.vehicles.clear();
     CHECK(QMetaObject::invokeMethod(&window, "onSnapshot", Qt::DirectConnection,

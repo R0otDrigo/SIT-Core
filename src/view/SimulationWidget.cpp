@@ -25,9 +25,9 @@ void SimulationWidget::buildUi() {
     root->addWidget(map_, 1);
     connect(map_, &MapView::busClicked, this,
             [this](int id, const QString& type, const QString& route,
-                   int passengers, int capacity, bool dwelling) {
+                   int passengers, int capacity, bool dwelling, const QString& nextStop) {
         selectedBusId_ = id;
-        showBusInfo(id, type, route, passengers, capacity, dwelling);
+        showBusInfo(id, type, route, passengers, capacity, dwelling, nextStop);
     });
 
     auto* side = new QWidget;
@@ -56,6 +56,9 @@ void SimulationWidget::buildUi() {
     busFreeSeatsLabel_ = new QLabel;
     busFreeSeatsLabel_->setObjectName("busFreeSeatsLabel");
     busStatusLabel_ = new QLabel;
+    busNextStopLabel_ = new QLabel;
+    busNextStopLabel_->setObjectName("busNextStopLabel");
+    busNextStopLabel_->setWordWrap(true);
     busOccupancyBar_ = new QProgressBar;
     busOccupancyBar_->setObjectName("busOccupancyBar");
     busOccupancyBar_->setRange(0, 100);
@@ -65,6 +68,7 @@ void SimulationWidget::buildUi() {
     busFields->addRow(tr("Pasajeros:"), busPassengersLabel_);
     busFields->addRow(tr("Asientos libres:"), busFreeSeatsLabel_);
     busFields->addRow(tr("Estado:"), busStatusLabel_);
+    busFields->addRow(tr("Próximo paradero:"), busNextStopLabel_);
     busFields->addRow(tr("Ocupación:"), busOccupancyBar_);
     busLayout->addWidget(busInfoDetails_);
     busInfoDetails_->hide();
@@ -186,7 +190,8 @@ void SimulationWidget::onSnapshot(const sit::Snapshot& s) {
             if (routeInfo != s.routes.end())
                 route += QStringLiteral(" - ") + QString::fromStdString(routeInfo->name);
             showBusInfo(bus->id, QString::fromStdString(bus->type), route,
-                        bus->passengers, bus->capacity, bus->dwelling);
+                        bus->passengers, bus->capacity, bus->dwelling,
+                        QString::fromStdString(bus->nextStopName));
         }
     }
 
@@ -220,7 +225,7 @@ void SimulationWidget::onSnapshot(const sit::Snapshot& s) {
 }
 
 void SimulationWidget::showBusInfo(int id, const QString& type, const QString& route,
-                                   int passengers, int capacity, bool dwelling) {
+                                   int passengers, int capacity, bool dwelling, const QString& nextStop) {
     busInfoPanel_->setTitle(tr("Bus #%1").arg(id));
     busInfoHint_->hide();
     busInfoDetails_->show();
@@ -229,6 +234,7 @@ void SimulationWidget::showBusInfo(int id, const QString& type, const QString& r
     busPassengersLabel_->setText(tr("%1 / %2").arg(passengers).arg(capacity));
     busFreeSeatsLabel_->setText(QString::number(std::max(0, capacity - passengers)));
     busStatusLabel_->setText(dwelling ? tr("Detenido en paradero") : tr("En marcha"));
+    busNextStopLabel_->setText(nextStop.isEmpty() ? tr("No disponible") : nextStop);
     busOccupancyBar_->setValue(capacity > 0 ? std::clamp(100 * passengers / capacity, 0, 100) : 0);
 }
 

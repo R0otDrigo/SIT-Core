@@ -42,6 +42,7 @@ int main(int argc, char** argv) {
     bus.passengers = 23;
     bus.capacity = 160;
     bus.dwelling = true;
+    bus.nextStopName = "Terminal";
     snapshot.vehicles.push_back(bus);
     view.refresh(snapshot);
     app.processEvents();
@@ -49,7 +50,7 @@ int main(int argc, char** argv) {
     int clicks = 0;
     QObject::connect(&view, &MapView::busClicked,
                      [&](int id, const QString& type, const QString& routeName,
-                         int passengers, int capacity, bool dwelling) {
+                         int passengers, int capacity, bool dwelling, const QString& nextStop) {
         ++clicks;
         if (clicks <= 2) {
             CHECK(id == 7);
@@ -58,6 +59,7 @@ int main(int argc, char** argv) {
             CHECK(passengers == 23);
             CHECK(capacity == 160);
             CHECK(dwelling);
+            CHECK(nextStop == "Terminal");
         } else {
             CHECK(id == 8);
         }

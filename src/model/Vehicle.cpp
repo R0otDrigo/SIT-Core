@@ -42,6 +42,17 @@ std::shared_ptr<Stop> Vehicle::targetStop() const {
     return r->stops()[index_];
 }
 
+std::shared_ptr<Stop> Vehicle::nextStop() const {
+    auto r = route_.lock();
+    if (!r || r->size() < 2 || index_ >= r->size()) return nullptr;
+    if (state_ != VehicleState::Dwelling) return r->stops()[index_];
+
+    long next = static_cast<long>(index_) + dir_;
+    if (next < 0 || next >= static_cast<long>(r->size()))
+        next = static_cast<long>(index_) - dir_;
+    return r->stops()[static_cast<std::size_t>(next)];
+}
+
 bool Vehicle::atRouteEnd() const {
     auto r = route_.lock();
     return r && (index_ == 0 || index_ + 1 == r->size());

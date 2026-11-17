@@ -32,7 +32,7 @@ private:
     void buildUi();
     void populateRoutes(const sit::Snapshot& snapshot);
     void showBusInfo(int id, const QString& type, const QString& route,
-                     int passengers, int capacity, bool dwelling);
+                     int passengers, int capacity, bool dwelling, const QString& nextStop);
     void clearBusInfo(const QString& message);
     void addLog(const QString& line);
 
@@ -48,6 +48,7 @@ private:
     QLabel* busPassengersLabel_{};
     QLabel* busFreeSeatsLabel_{};
     QLabel* busStatusLabel_{};
+    QLabel* busNextStopLabel_{};
     QProgressBar* busOccupancyBar_{};
     QLabel* busesLabel_{};
     QLabel* transportedLabel_{};

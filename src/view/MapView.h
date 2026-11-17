@@ -19,7 +19,7 @@ public:
 
 signals:
     void busClicked(int id, const QString& type, const QString& route,
-                    int passengers, int capacity, bool dwelling);
+                    int passengers, int capacity, bool dwelling, const QString& nextStop);
 
 protected:
     void mousePressEvent(QMouseEvent* event) override;

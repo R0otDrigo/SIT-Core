@@ -230,7 +230,8 @@ void MapView::mousePressEvent(QMouseEvent* event) {
                 route += QStringLiteral(" - ") + routeName->second;
             setSelectedBus(id);
             emit busClicked(v.id, QString::fromStdString(v.type), route,
-                            v.passengers, v.capacity, v.dwelling);
+                            v.passengers, v.capacity, v.dwelling,
+                            QString::fromStdString(v.nextStopName));
             event->accept();
             return;
         }

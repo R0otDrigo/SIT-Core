@@ -159,6 +159,8 @@ Snapshot Network::snapshot() const {
         v.id = b->id(); v.type = b->typeName();
         auto r = b->route();
         v.routeId = r ? r->id() : "";
+        auto next = b->nextStop();
+        v.nextStopName = next ? next->name() : "";
         v.x = b->position().x; v.y = b->position().y;
         v.passengers = b->passengers(); v.capacity = b->capacity();
         v.dwelling = b->state() == VehicleState::Dwelling;
