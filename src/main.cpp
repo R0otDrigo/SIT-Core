@@ -4,6 +4,7 @@
 #include <QSettings>
 #include <QDebug>
 #include <QUrl>
+#include <QQmlApplicationEngine>
 
 #include "view/mainwindow.h"
 
@@ -24,11 +25,14 @@ int main(int argc, char *argv[]) {
     w.setApiConfig(apiKey, projectId);
     w.show();
 
-    QQuickView view;
+    QQmlApplicationEngine engine;
+    // Load the QML file from the resource system
+    const QUrl url = QUrl("qrc:/traficMap.qml");
 
-    const QUrl url(u"view/openstreetmaps.qml"_qs);
-    view.setSource(url);
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed,
+                     &a, []() { QCoreApplication::exit(-1); },
+                     Qt::QueuedConnection);
+    engine.load(url);
 
-    view.show();
     return a.exec();
 }

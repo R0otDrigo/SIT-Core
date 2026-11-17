@@ -29,12 +29,12 @@ Window {
         plugin: mapPlugin
 
         // Set the starting point (Latitude, Longitude)
-        center: QtPositioning.coordinate(40.7128, -74.0060) // Example: New York
+        center: QtPositioning.coordinate(-16.399843, -71.537716) // Example: New York
         zoomLevel: 12
 
         // Optional: Add a marker (MapQuickItem) to point to a specific spot
         MapQuickItem {
-            coordinate: QtPositioning.coordinate(40.7128, -74.0060)
+            coordinate: QtPositioning.coordinate(16.399843, -71.537716)
             anchorPoint.x: markerIcon.width / 2
             anchorPoint.y: markerIcon.height
 
