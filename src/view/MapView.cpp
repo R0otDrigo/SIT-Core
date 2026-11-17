@@ -200,6 +200,17 @@ void MapView::refresh(const sit::Snapshot& snap) {
         if (!alive.contains(it->first)) { scene_.removeItem(it->second); delete it->second; it = vehicles_.erase(it); }
         else ++it;
     }
+    if (selectedBusId_ >= 0 && !alive.contains(selectedBusId_))
+        setSelectedBus(-1);
+}
+
+void MapView::setSelectedBus(int id) {
+    selectedBusId_ = id;
+    for (const auto& [busId, rect] : vehicles_) {
+        const bool selected = busId == selectedBusId_;
+        rect->setPen(QPen(selected ? QColor("#f59e0b") : QColor(Qt::black), selected ? 3.0 : 1.5));
+        rect->setZValue(selected ? 5 : 3);
+    }
 }
 
 void MapView::mousePressEvent(QMouseEvent* event) {
@@ -217,6 +228,7 @@ void MapView::mousePressEvent(QMouseEvent* event) {
             QString route = QString::fromStdString(v.routeId);
             if (routeName != routeNames_.end())
                 route += QStringLiteral(" - ") + routeName->second;
+            setSelectedBus(id);
             emit busClicked(v.id, QString::fromStdString(v.type), route,
                             v.passengers, v.capacity, v.dwelling);
             event->accept();

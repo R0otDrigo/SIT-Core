@@ -28,6 +28,7 @@ protected:
 private:
     void build(const sit::Snapshot& snapshot);        // items estaticos (una sola vez)
     void placeLabels(const sit::Snapshot& snapshot, const std::map<std::string, QPointF>& pos);
+    void setSelectedBus(int id);
 
     struct StopItem {
         QGraphicsEllipseItem* dot{};
@@ -47,5 +48,6 @@ private:
     std::map<int, QGraphicsRectItem*> vehicles_;
     std::map<int, sit::VehicleView> currentVehicles_;
     std::map<std::string, QString> routeNames_;
+    int selectedBusId_{-1};
     QGraphicsSimpleTextItem* eventBanner_{};
 };

@@ -51,12 +51,16 @@ int main(int argc, char** argv) {
                      [&](int id, const QString& type, const QString& routeName,
                          int passengers, int capacity, bool dwelling) {
         ++clicks;
-        CHECK(id == 7);
-        CHECK(type == "Articulado");
-        CHECK(routeName == "T1 - Troncal");
-        CHECK(passengers == 23);
-        CHECK(capacity == 160);
-        CHECK(dwelling);
+        if (clicks <= 2) {
+            CHECK(id == 7);
+            CHECK(type == "Articulado");
+            CHECK(routeName == "T1 - Troncal");
+            CHECK(passengers == 23);
+            CHECK(capacity == 160);
+            CHECK(dwelling);
+        } else {
+            CHECK(id == 8);
+        }
     });
 
     QGraphicsRectItem* drawing = nullptr;
@@ -67,18 +71,42 @@ int main(int argc, char** argv) {
     CHECK(drawing != nullptr);
     click(view, drawing->mapToScene(QPointF(drawing->rect().right() - 1, 0)));
     CHECK(clicks == 1);
+    CHECK(drawing->pen().color() == QColor("#f59e0b"));
+    CHECK(drawing->zValue() == 5);
     CHECK(!drawing->childItems().isEmpty());
     QGraphicsItem* number = drawing->childItems().first();
     click(view, number->mapToScene(number->boundingRect().center()));
     CHECK(clicks == 2);
 
+    sit::VehicleView secondBus = bus;
+    secondBus.id = 8;
+    secondBus.x = 200;
+    snapshot.vehicles.push_back(secondBus);
+    view.refresh(snapshot);
+    QGraphicsRectItem* secondDrawing = nullptr;
+    for (QGraphicsItem* item : view.scene()->items()) {
+        auto* rect = dynamic_cast<QGraphicsRectItem*>(item);
+        if (rect && rect->data(0).isValid() && rect->data(0).toInt() == 8) secondDrawing = rect;
+    }
+    CHECK(secondDrawing != nullptr);
+    click(view, secondDrawing->scenePos());
+    CHECK(clicks == 3);
+    CHECK(secondDrawing->pen().color() == QColor("#f59e0b"));
+    CHECK(drawing->pen().color() == QColor(Qt::black));
+
+    snapshot.vehicles.back().x = 220;
+    view.refresh(snapshot);
+    CHECK(secondDrawing->scenePos().x() == 220);
+    CHECK(secondDrawing->pen().color() == QColor("#f59e0b"));
+
     click(view, QPointF(300, 200));
     click(view, drawing->scenePos(), Qt::RightButton);
-    CHECK(clicks == 2);
+    CHECK(clicks == 3);
 
     snapshot.vehicles.clear();
     view.refresh(snapshot);
     click(view, QPointF(bus.x, bus.y));
-    CHECK(clicks == 2);
+    click(view, QPointF(secondBus.x, secondBus.y));
+    CHECK(clicks == 3);
     return 0;
 }
