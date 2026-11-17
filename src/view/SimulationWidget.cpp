@@ -1,9 +1,9 @@
 #include "view/SimulationWidget.h"
+#include <QFormLayout>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QHeaderView>
-#include <QMessageBox>
 #include <QVBoxLayout>
 #include <algorithm>
 #include <vector>
@@ -26,12 +26,8 @@ void SimulationWidget::buildUi() {
     connect(map_, &MapView::busClicked, this,
             [this](int id, const QString& type, const QString& route,
                    int passengers, int capacity, bool dwelling) {
-        const QString details = tr("Tipo: %1\nRuta: %2\nPasajeros: %3/%4\nEstado: %5")
-            .arg(type, route)
-            .arg(passengers)
-            .arg(capacity)
-            .arg(dwelling ? tr("Detenido en paradero") : tr("En marcha"));
-        QMessageBox::information(this, tr("Bus #%1").arg(id), details);
+        selectedBusId_ = id;
+        showBusInfo(id, type, route, passengers, capacity, dwelling);
     });
 
     auto* side = new QWidget;
@@ -43,6 +39,36 @@ void SimulationWidget::buildUi() {
     QFont big = clockLabel_->font(); big.setPointSize(14); big.setBold(true);
     clockLabel_->setFont(big);
     col->addWidget(clockLabel_);
+
+    busInfoPanel_ = new QGroupBox(tr("Información del bus"));
+    busInfoPanel_->setObjectName("busInfoPanel");
+    auto* busLayout = new QVBoxLayout(busInfoPanel_);
+    busInfoHint_ = new QLabel(tr("Selecciona un bus en el mapa"));
+    busLayout->addWidget(busInfoHint_);
+    busInfoDetails_ = new QWidget;
+    busInfoDetails_->setObjectName("busInfoDetails");
+    auto* busFields = new QFormLayout(busInfoDetails_);
+    busTypeLabel_ = new QLabel;
+    busRouteLabel_ = new QLabel;
+    busRouteLabel_->setWordWrap(true);
+    busPassengersLabel_ = new QLabel;
+    busPassengersLabel_->setObjectName("busPassengersLabel");
+    busFreeSeatsLabel_ = new QLabel;
+    busFreeSeatsLabel_->setObjectName("busFreeSeatsLabel");
+    busStatusLabel_ = new QLabel;
+    busOccupancyBar_ = new QProgressBar;
+    busOccupancyBar_->setObjectName("busOccupancyBar");
+    busOccupancyBar_->setRange(0, 100);
+    busOccupancyBar_->setFormat(tr("%p% ocupado"));
+    busFields->addRow(tr("Tipo:"), busTypeLabel_);
+    busFields->addRow(tr("Ruta:"), busRouteLabel_);
+    busFields->addRow(tr("Pasajeros:"), busPassengersLabel_);
+    busFields->addRow(tr("Asientos libres:"), busFreeSeatsLabel_);
+    busFields->addRow(tr("Estado:"), busStatusLabel_);
+    busFields->addRow(tr("Ocupación:"), busOccupancyBar_);
+    busLayout->addWidget(busInfoDetails_);
+    busInfoDetails_->hide();
+    col->addWidget(busInfoPanel_);
 
     // --- Simulacion ---
     auto* simBox = new QGroupBox("Simulacion");
@@ -147,6 +173,22 @@ void SimulationWidget::onRouteChanged() {
 void SimulationWidget::onSnapshot(const sit::Snapshot& s) {
     if (!routesLoaded_) populateRoutes(s);
     map_->refresh(s);
+    if (selectedBusId_ >= 0) {
+        const auto bus = std::find_if(s.vehicles.begin(), s.vehicles.end(),
+                                      [this](const sit::VehicleView& v) { return v.id == selectedBusId_; });
+        if (bus == s.vehicles.end()) {
+            selectedBusId_ = -1;
+            clearBusInfo(tr("El bus seleccionado fue retirado"));
+        } else {
+            QString route = QString::fromStdString(bus->routeId);
+            const auto routeInfo = std::find_if(s.routes.begin(), s.routes.end(),
+                                                [bus](const sit::RouteView& r) { return r.id == bus->routeId; });
+            if (routeInfo != s.routes.end())
+                route += QStringLiteral(" - ") + QString::fromStdString(routeInfo->name);
+            showBusInfo(bus->id, QString::fromStdString(bus->type), route,
+                        bus->passengers, bus->capacity, bus->dwelling);
+        }
+    }
 
     clockLabel_->setText(QString("Hora simulada %1%2").arg(QString::fromStdString(s.clock), s.paused ? "  (pausa)" : ""));
     busesLabel_->setText(QString("%1 / %2").arg(s.stats.activeVehicles).arg(s.stats.fleetLimit));
@@ -175,6 +217,26 @@ void SimulationWidget::onSnapshot(const sit::Snapshot& s) {
     }
 
     for (const auto& line : s.log) addLog(QString::fromStdString(line));
+}
+
+void SimulationWidget::showBusInfo(int id, const QString& type, const QString& route,
+                                   int passengers, int capacity, bool dwelling) {
+    busInfoPanel_->setTitle(tr("Bus #%1").arg(id));
+    busInfoHint_->hide();
+    busInfoDetails_->show();
+    busTypeLabel_->setText(type);
+    busRouteLabel_->setText(route);
+    busPassengersLabel_->setText(tr("%1 / %2").arg(passengers).arg(capacity));
+    busFreeSeatsLabel_->setText(QString::number(std::max(0, capacity - passengers)));
+    busStatusLabel_->setText(dwelling ? tr("Detenido en paradero") : tr("En marcha"));
+    busOccupancyBar_->setValue(capacity > 0 ? std::clamp(100 * passengers / capacity, 0, 100) : 0);
+}
+
+void SimulationWidget::clearBusInfo(const QString& message) {
+    busInfoPanel_->setTitle(tr("Información del bus"));
+    busInfoDetails_->hide();
+    busInfoHint_->setText(message);
+    busInfoHint_->show();
 }
 
 void SimulationWidget::addLog(const QString& line) {

@@ -1,8 +1,10 @@
 #pragma once
 #include <QComboBox>
+#include <QGroupBox>
 #include <QLabel>
 #include <QListWidget>
 #include <QPushButton>
+#include <QProgressBar>
 #include <QTableWidget>
 #include <QWidget>
 #include <map>
@@ -29,12 +31,24 @@ private slots:
 private:
     void buildUi();
     void populateRoutes(const sit::Snapshot& snapshot);
+    void showBusInfo(int id, const QString& type, const QString& route,
+                     int passengers, int capacity, bool dwelling);
+    void clearBusInfo(const QString& message);
     void addLog(const QString& line);
 
     SimulationController* controller_{};
     MapView* map_{};
 
     QLabel* clockLabel_{};
+    QGroupBox* busInfoPanel_{};
+    QWidget* busInfoDetails_{};
+    QLabel* busInfoHint_{};
+    QLabel* busTypeLabel_{};
+    QLabel* busRouteLabel_{};
+    QLabel* busPassengersLabel_{};
+    QLabel* busFreeSeatsLabel_{};
+    QLabel* busStatusLabel_{};
+    QProgressBar* busOccupancyBar_{};
     QLabel* busesLabel_{};
     QLabel* transportedLabel_{};
     QLabel* abandonedLabel_{};
@@ -48,5 +62,6 @@ private:
     QListWidget* logList_{};
 
     bool routesLoaded_{false};
+    int selectedBusId_{-1};
     std::map<QString, bool> routeIsTrunk_;
 };
