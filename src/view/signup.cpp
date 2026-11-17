@@ -1,60 +1,25 @@
 #include "signup.h"
 #include "ui_signup.h"
 
-#include "string"
-#include <QCloseEvent>
 #include <QEvent>
-#include <iostream>
-#include <qnamespace.h>
 
-SignUp::SignUp(QWidget *parent) : QWidget(parent), ui(new Ui::SignUp) {
+SignUp::SignUp(FirebaseAuthManager *authManager, QWidget *parent)
+    : QWidget(parent), ui(new Ui::SignUp), m_authManager(authManager) {
   ui->setupUi(this);
+  setWindowFlag(Qt::Window);
+  setWindowModality(Qt::ApplicationModal);
 
-  connect(ui->confirmButton, &QPushButton::clicked, this,
-          &SignUp::onSignUpClicked);
-  // connect(m_authManager, &FirebaseAuthManager::signUpSucceeded, this,
-  // &SignUp::onSignUpSuccess); connect(m_authManager,
-  // &FirebaseAuthManager::signUpFailed, this, &SignUp::onSignUpFailed);
+  connect(ui->confirmButton, &QPushButton::clicked, this, &SignUp::onSignUpClicked);
+  connect(m_authManager, &FirebaseAuthManager::signUpSucceeded, this, &SignUp::onSignUpSuccess);
+  connect(m_authManager, &FirebaseAuthManager::signUpFailed, this, &SignUp::onSignUpFailed);
 }
 
-void SignUp::setFirebaseConfig(const QString &apiKey,
-                               const QString &projectId) {
-  m_authManager->setApiKey(apiKey);
-  m_authManager->setProjectId(projectId);
-}
-
-void SignUp::setFirebaseAuthManager(FirebaseAuthManager *reference) {
-  if (m_authManager == reference)
-    return; // Evitar reconectar si es el mismo
-
-  m_authManager = reference;
-
-  if (m_authManager) {
-    // Usamos Qt::UniqueConnection para evitar que la señal se dispare 2 veces
-    connect(m_authManager, &FirebaseAuthManager::signUpSucceeded, this,
-            &SignUp::onSignUpSuccess, Qt::UniqueConnection);
-    connect(m_authManager, &FirebaseAuthManager::signUpFailed, this,
-            &SignUp::onSignUpFailed, Qt::UniqueConnection);
-  }
-}
-
-void SignUp::closeEvent(QCloseEvent *event) {
-  QWidget::closeEvent(event);
-  emit closed();
-}
-
-void SignUp::changeEvent(QEvent *event) {
-  if (event->type() == QEvent::LanguageChange)
-    retranslate();
-  QWidget::changeEvent(event);
-}
-
-void SignUp::retranslate() { ui->retranslateUi(this); }
+SignUp::~SignUp() { delete ui; }
 
 void SignUp::onSignUpClicked() {
-  QString email = ui->correoElectronicoLineEdit->text().trimmed();
-  QString password = ui->contraseALineEdit->text();
-  QString role = ui->rolComboBox->currentText();
+  const QString email = ui->correoElectronicoLineEdit->text().trimmed();
+  const QString password = ui->contraseALineEdit->text();
+  const QString role = ui->rolComboBox->currentText();
 
   if (email.isEmpty() || password.isEmpty()) {
     ui->info->setText(tr("Por favor, insertar correo y contraseña"));
@@ -69,20 +34,18 @@ void SignUp::onSignUpClicked() {
 void SignUp::onSignUpSuccess() {
   ui->confirmButton->setEnabled(true);
   ui->info->setText(tr("Registro Completado"));
-
-  this->hide();
-
-  std::cout << "En teoria si se registró correctamente" << std::endl;
+  close();
 }
 
 void SignUp::onSignUpFailed(const QString &error) {
   ui->confirmButton->setEnabled(true);
-
-  ui->info->setText("Error: " + error);
-  if (error == nullptr) {
-    ui->info->setText("Error: Sin connección a interned");
-  }
-  std::cout << qPrintable(error) << std::endl;
+  ui->info->setText(error.isEmpty() ? tr("Error: Sin conexión a internet") : "Error: " + error);
 }
 
-SignUp::~SignUp() { delete ui; }
+void SignUp::changeEvent(QEvent *event) {
+  if (event->type() == QEvent::LanguageChange)
+    retranslate();
+  QWidget::changeEvent(event);
+}
+
+void SignUp::retranslate() { ui->retranslateUi(this); }

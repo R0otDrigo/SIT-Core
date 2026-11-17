@@ -1,27 +1,23 @@
-
 #include "login.h"
-#include "QSettings"
-#include "signup.h"
 #include "ui_login.h"
-#include "ui_signup.h"
+
+#include <QApplication>
 #include <QEvent>
-#include <cstddef>
 
 Login::Login(QWidget *parent)
-    : QWidget(parent), ui(new Ui::Login), signUp(nullptr),
-      m_authManager(new FirebaseAuthManager(this)) {
+    : QWidget(parent), ui(new Ui::Login), m_authManager(new FirebaseAuthManager(this)) {
   ui->setupUi(this);
 
   connect(ui->loginButton, &QPushButton::clicked, this, &Login::onLoginClicked);
-  connect(ui->signUpButton, &QPushButton::clicked, this,
-          &Login::onSignUpClicked);
-  connect(m_authManager, &FirebaseAuthManager::signInSuccess, this,
-          &Login::onSignInSuccess);
-  connect(m_authManager, &FirebaseAuthManager::signInFailed, this,
-          &Login::onSignInFailed);
-  connect(m_authManager, &FirebaseAuthManager::signUpSucceeded, this,
-          &Login::onSignUpSuccess);
+  connect(ui->contraseALineEdit, &QLineEdit::returnPressed, this, &Login::onLoginClicked);
+  connect(ui->signUpButton, &QPushButton::clicked, this, &Login::onSignUpClicked);
+  connect(ui->exitButton, &QPushButton::clicked, qApp, &QApplication::quit);
+
+  connect(m_authManager, &FirebaseAuthManager::signInSuccess, this, &Login::onSignInSuccess);
+  connect(m_authManager, &FirebaseAuthManager::signInFailed, this, &Login::onSignInFailed);
 }
+
+Login::~Login() { delete ui; }
 
 void Login::setFirebaseConfig(const QString &apiKey, const QString &projectId) {
   m_authManager->setApiKey(apiKey);
@@ -29,8 +25,8 @@ void Login::setFirebaseConfig(const QString &apiKey, const QString &projectId) {
 }
 
 void Login::onLoginClicked() {
-  QString email = ui->correoLineEdit->text().trimmed();
-  QString password = ui->contraseALineEdit->text();
+  const QString email = ui->correoLineEdit->text().trimmed();
+  const QString password = ui->contraseALineEdit->text();
 
   if (email.isEmpty() || password.isEmpty()) {
     ui->info->setText(tr("Por favor, insertar correo y contraseña"));
@@ -42,50 +38,30 @@ void Login::onLoginClicked() {
   m_authManager->signIn(email, password);
 }
 
+// SignUp es una ventana modal hija que comparte el mismo FirebaseAuthManager (ya configurado).
 void Login::onSignUpClicked() {
-
-  if (!signUp) {
-    signUp = new SignUp();
-    connect(signUp, &SignUp::closed, this, &Login::show);
-  }
-
-  signUp->setFirebaseAuthManager(m_authManager);
-
-  const QString configPath =
-      QCoreApplication::applicationDirPath() + "/config.ini";
-  QSettings settings(configPath, QSettings::IniFormat);
-
-  QString API_KEY = settings.value("FIREBASE_API_KEY").toString();
-
-  QString PROJECT_ID = settings.value("FIREBASE_PROJECT_ID").toString();
-  signUp->setFirebaseConfig(API_KEY, PROJECT_ID);
-
+  if (!signUp)
+    signUp = new SignUp(m_authManager, this);
   signUp->show();
-
-  this->hide();
 }
-void Login::onSignInSuccess(const QString &localId, const QString &idToken,
-                            const QString &role) {
+
+void Login::onSignInSuccess(const QString &localId, const QString &idToken, const QString &role) {
   Q_UNUSED(localId);
   Q_UNUSED(idToken);
   ui->loginButton->setEnabled(true);
-  ui->info->setText("");
-  // accept(); // What does that ... o.o
+  ui->info->clear();
   emit loginSuccessful(role);
 }
 
 void Login::onSignInFailed(const QString &error) {
   ui->loginButton->setEnabled(true);
-
-  ui->info->setText("Error: " + error);
-  if (error == nullptr) {
-    ui->info->setText("Error: Sin conneción disponible");
-  }
+  ui->info->setText(error.isEmpty() ? tr("Error: Sin conexión disponible") : "Error: " + error);
 }
 
-void Login::onSignUpSuccess() { this->show(); }
-
-void Login::reset() {}
+void Login::reset() {
+  ui->contraseALineEdit->clear();
+  ui->info->clear();
+}
 
 void Login::retranslate() { ui->retranslateUi(this); }
 
@@ -93,9 +69,4 @@ void Login::changeEvent(QEvent *event) {
   if (event->type() == QEvent::LanguageChange)
     retranslate();
   QWidget::changeEvent(event);
-}
-
-Login::~Login() {
-  delete signUp;
-  delete ui;
 }

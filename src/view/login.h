@@ -2,44 +2,38 @@
 #define LOGIN_H
 
 #include <QWidget>
-#include <QString>
 #include "controller/firebaseauthmanager.h"
 #include "signup.h"
-
-class QEvent;
 
 namespace Ui {
 class Login;
 }
 
-class Login : public QWidget
-{
+class Login : public QWidget {
     Q_OBJECT
-
 public:
-    void setFirebaseConfig(const QString &apiKey, const QString &projectId);
     explicit Login(QWidget *parent = nullptr);
+    ~Login() override;
+
+    void setFirebaseConfig(const QString &apiKey, const QString &projectId);
     void reset();
     void retranslate();
-    ~Login();
-
-protected:
-    void changeEvent(QEvent *event) override;
 
 signals:
     void loginSuccessful(const QString &role);
 
+protected:
+    void changeEvent(QEvent *event) override;
+
 private slots:
     void onLoginClicked();
     void onSignUpClicked();
-    void onSignUpSuccess();
     void onSignInSuccess(const QString &localId, const QString &idToken, const QString &role);
     void onSignInFailed(const QString &error);
 
-
 private:
     Ui::Login *ui;
-    SignUp *signUp;
+    SignUp *signUp = nullptr;
     FirebaseAuthManager *m_authManager;
 };
 

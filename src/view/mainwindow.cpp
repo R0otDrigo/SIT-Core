@@ -9,7 +9,6 @@
 #include <QApplication>
 #include <QLocale>
 #include <QSettings>
-#include <QVBoxLayout>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), stack(new QStackedWidget(this)),
@@ -18,68 +17,47 @@ MainWindow::MainWindow(QWidget *parent)
       translator(new QTranslator(this)) {
   ui->setupUi(this);
 
-  // Agregar todas las páginas al stack
-  stack->addWidget(loginPage); // índice 0
-  stack->addWidget(adminPage); // índice 1
-  stack->addWidget(userPage);  // índice 2
-  stack->addWidget(guestPage); // índice 3
-
-  // stack->addWidget(centerContainer);
-
+  // El orden debe coincidir con el enum Page de mainwindow.h
+  stack->addWidget(loginPage);
+  stack->addWidget(adminPage);
+  stack->addWidget(userPage);
+  stack->addWidget(guestPage);
   setCentralWidget(stack);
-  showPage(0); // Iniciar en Login
+  showPage(LoginPage);
 
-  // La acción "User" (Logout) solo está disponible tras iniciar sesión
+  // El menu "User" (Logout) solo aparece tras iniciar sesion
   ui->menuLogout->menuAction()->setVisible(false);
-  connect(ui->actionLogout, &QAction::triggered, this,
-          &MainWindow::onLogoutRequested);
+  connect(ui->actionLogout, &QAction::triggered, this, &MainWindow::onLogoutRequested);
+  connect(loginPage, &Login::loginSuccessful, this, &MainWindow::onLoginSuccessful);
 
-  // Conectar señales de las páginas
-  connect(loginPage, &Login::loginSuccessful, this,
-          &MainWindow::onLoginSuccessful);
-  // connect(adminPage, &AdminDashboard::logoutRequested, this, &MainWindow::onLogoutRequested);
-  // connect(userPage, &UserDashboard::logoutRequested, this, &MainWindow::onLogoutRequested);
-  // connect(guestPage, &GuestDashboard::logoutRequested, this,&MainWindow::onLogoutRequested);
-
-  // Agrupar las acciones de idioma para que solo una esté seleccionada
-  QActionGroup *languageGroup = new QActionGroup(this);
-  languageGroup->setExclusive(true);
-  const QList<QAction *> languageActions = {
-      ui->actionEspa_ol, ui->actionIngles, ui->actionChino,
-      ui->actionArabe};
-  for (QAction *action : languageActions) {
-    action->setCheckable(true);
-    languageGroup->addAction(action);
+  // Idiomas: grupo exclusivo, una accion por locale
+  auto *languageGroup = new QActionGroup(this);
+  const QList<QPair<QAction *, QString>> languages = {
+      {ui->actionEspa_ol, "es_ES"},
+      {ui->actionIngles, "en_US"},
+      {ui->actionChino, "zh_CN"},
+      {ui->actionArabe, "ar_SA"}};
+  for (const auto &language : languages) {
+    const QString locale = language.second;
+    languageGroup->addAction(language.first);
+    connect(language.first, &QAction::triggered, this,
+            [this, locale] { onLanguageSelected(locale); });
   }
 
-  connect(ui->actionEspa_ol, &QAction::triggered, this,
-          [this] { onLanguageSelected("es_ES"); });
-  connect(ui->actionIngles, &QAction::triggered, this,
-          [this] { onLanguageSelected("en_US"); });
-  connect(ui->actionChino, &QAction::triggered, this,
-          [this] { onLanguageSelected("zh_CN"); });
-  connect(ui->actionArabe, &QAction::triggered, this,
-          [this] { onLanguageSelected("ar_SA"); });
-
   // Restaurar el idioma guardado o usar el del sistema
-  QSettings settings("TecnologiaObjetos", "appTecnologiaObjetos");
-  const QString savedLanguage = settings.value("language").toString();
-  applyLanguage(savedLanguage.isEmpty() ? QLocale::system().name()
-                                        : savedLanguage);
-}
-
-void MainWindow::setApiConfig(const QString &api_key, const QString &project_id){
-
-  loginPage->setFirebaseConfig(api_key, project_id);
+  const QString saved = QSettings().value("language").toString();
+  applyLanguage(saved.isEmpty() ? QLocale::system().name() : saved);
 }
 
 MainWindow::~MainWindow() { delete ui; }
 
+void MainWindow::setApiConfig(const QString &apiKey, const QString &projectId) {
+  loginPage->setFirebaseConfig(apiKey, projectId);
+}
+
 void MainWindow::onLanguageSelected(const QString &locale) {
   applyLanguage(locale);
-
-  QSettings settings("TecnologiaObjetos", "appTecnologiaObjetos");
-  settings.setValue("language", supportedLocale(locale));
+  QSettings().setValue("language", supportedLocale(locale));
 }
 
 void MainWindow::applyLanguage(const QString &locale) {
@@ -89,8 +67,7 @@ void MainWindow::applyLanguage(const QString &locale) {
   if (translator->load(":/i18n/TecnologiaObjetos_" + normalized + ".qm"))
     qApp->installTranslator(translator);
 
-  qApp->setLayoutDirection(normalized == "ar_SA" ? Qt::RightToLeft
-                                                 : Qt::LeftToRight);
+  qApp->setLayoutDirection(normalized == "ar_SA" ? Qt::RightToLeft : Qt::LeftToRight);
   selectLanguageAction(normalized);
 }
 
@@ -117,25 +94,23 @@ QString MainWindow::supportedLocale(const QString &locale) {
 }
 
 void MainWindow::onLoginSuccessful(const QString &role) {
-  QString r = role.toLower();
+  const QString r = role.toLower();
   if (r == "admin" || r == "administrator")
-    showPage(1);
+    showPage(AdminPage);
   else if (r == "guest")
-    showPage(3);
+    showPage(GuestPage);
   else
-    showPage(2);
-
-  // Mostrar el menú "User" con la acción de Logout una vez autenticado
+    showPage(UserPage);
   ui->menuLogout->menuAction()->setVisible(true);
 }
 
 void MainWindow::onLogoutRequested() {
-  showPage(0);
+  loginPage->reset();
+  showPage(LoginPage);
   ui->menuLogout->menuAction()->setVisible(false);
-  loginPage->reset(); // limpiar campos si es necesario
 }
 
-void MainWindow::showPage(int index) { stack->setCurrentIndex(index); }
+void MainWindow::showPage(Page page) { stack->setCurrentIndex(page); }
 
 void MainWindow::changeEvent(QEvent *event) {
   if (event->type() == QEvent::LanguageChange)

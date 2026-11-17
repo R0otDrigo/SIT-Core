@@ -6,97 +6,86 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>380</width>
+    <height>220</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Registrarse</string>
   </property>
-  <widget class="QPushButton" name="confirmButton">
-   <property name="geometry">
-    <rect>
-     <x>140</x>
-     <y>250</y>
-     <width>101</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Confirmar</string>
-   </property>
-  </widget>
-  <widget class="QWidget" name="formLayoutWidget">
-   <property name="geometry">
-    <rect>
-     <x>6</x>
-     <y>50</y>
-     <width>381</width>
-     <height>101</height>
-    </rect>
-   </property>
-   <layout class="QFormLayout" name="formLayout">
-    <item row="0" column="0">
-     <widget class="QLabel" name="correoElectronicoLabel">
-      <property name="text">
-       <string>Correo Electronico</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QLineEdit" name="correoElectronicoLineEdit"/>
-    </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="contraseALabel">
-      <property name="text">
-       <string>Contraseña</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QLineEdit" name="contraseALineEdit"/>
-    </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="rolLabel">
-      <property name="text">
-       <string>Rol</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="1">
-     <widget class="QComboBox" name="rolComboBox">
-      <item>
+  <layout class="QVBoxLayout" name="rootLayout">
+   <item>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="correoElectronicoLabel">
        <property name="text">
-        <string>ADMIN</string>
+        <string>Correo Electronico</string>
        </property>
-      </item>
-      <item>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="correoElectronicoLineEdit"/>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="contraseALabel">
        <property name="text">
-        <string>USER</string>
+        <string>Contraseña</string>
        </property>
-      </item>
-      <item>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="contraseALineEdit">
+       <property name="echoMode">
+        <enum>QLineEdit::EchoMode::Password</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="rolLabel">
        <property name="text">
-        <string>GUESS</string>
+        <string>Rol</string>
        </property>
-      </item>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QLabel" name="info">
-   <property name="geometry">
-    <rect>
-     <x>7</x>
-     <y>170</y>
-     <width>381</width>
-     <height>71</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="rolComboBox">
+       <item>
+        <property name="text">
+         <string>USER</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>ADMIN</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>GUEST</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="info">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item alignment="Qt::AlignmentFlag::AlignRight">
+    <widget class="QPushButton" name="confirmButton">
+     <property name="text">
+      <string>Confirmar</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>

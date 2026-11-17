@@ -32,6 +32,10 @@ ctest --test-dir build --output-on-failure    # 7 pruebas
 
 Windows / macOS: instalar Qt 6 y pasar `-DCMAKE_PREFIX_PATH=<ruta de Qt>` (o abrir en Qt Creator).
 Sin Qt, CMake compila solo el modelo y las pruebas que no usan interfaz.
+Las traducciones (`i18n/*.ts`) se incluyen solo si esta instalado Qt LinguistTools (`qt6-tools-dev`).
+
+Login con Firebase: crear `config.ini` en la raiz (no se sube a git) con
+`FIREBASE_API_KEY=...` y `FIREBASE_PROJECT_ID=...`.
 
 ## Arquitectura (MVC)
 
@@ -43,6 +47,21 @@ Sin Qt, CMake compila solo el modelo y las pruebas que no usan interfaz.
 ```
 
 El modelo corre en otro hilo y habla con la vista solo mediante `Snapshot` (copias de datos simples).
+
+```
+src/
+  common/      excepciones, Position, Repository<T>
+  model/       logica de la simulacion (sin Qt)
+  controller/  SimulationController, FirebaseAuthManager
+  view/        MainWindow -> Login | Dashboard (Admin / User / Guest)
+               UserDashboard contiene SimulationWidget (MapView + panel de control)
+tests/         test_<tema>.cpp (se agregan solos a CTest)
+i18n/          traducciones es / en / zh / ar
+data/          red de ejemplo (network.csv)
+```
+
+Para agregar una pagina por rol: heredar de `Dashboard`, sobrescribir `dashboardTitle()` y
+agregar widgets en `contentLayout()`; luego registrarla en `MainWindow`.
 
 ## Cumplimiento de la consigna (estado Demo 1)
 
@@ -59,10 +78,6 @@ El modelo corre en otro hilo y habla con la vista solo mediante `Snapshot` (copi
 | Git y CMake | ramas por integrante + PR con revision; CMake con `file(GLOB)` para no pisar el CMake de otros |
 | Pruebas unitarias | `tests/` (CTest, 7 ejecutables) |
 | CI | `.github/workflows/ci.yml` |
-
-## Quien subio que
-
-Ver [`docs/DEMO1_SUBIDA.md`](docs/DEMO1_SUBIDA.md).
 
 ## Integrantes
 

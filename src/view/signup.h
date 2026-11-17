@@ -4,30 +4,20 @@
 #include <QWidget>
 #include "controller/firebaseauthmanager.h"
 
-class QCloseEvent;
-class QEvent;
-
 namespace Ui {
 class SignUp;
 }
 
-class SignUp : public QWidget
-{
+// Ventana modal de registro. Usa el FirebaseAuthManager de Login (no es su duenio).
+class SignUp : public QWidget {
     Q_OBJECT
-
 public:
-    void setFirebaseConfig(const QString &apiKey, const QString &projectId);
-    void setFirebaseAuthManager(FirebaseAuthManager *reference);
-    explicit SignUp(QWidget *parent = nullptr);
-    ~SignUp();
+    explicit SignUp(FirebaseAuthManager *authManager, QWidget *parent = nullptr);
+    ~SignUp() override;
 
     void retranslate();
 
-signals:
-    void closed();
-
 protected:
-    void closeEvent(QCloseEvent *event) override;
     void changeEvent(QEvent *event) override;
 
 private slots:
@@ -37,8 +27,7 @@ private slots:
 
 private:
     Ui::SignUp *ui;
-
-    FirebaseAuthManager *m_authManager = nullptr;
+    FirebaseAuthManager *m_authManager;
 };
 
 #endif // SIGNUP_H

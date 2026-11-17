@@ -9,7 +9,6 @@ class UserDashboard : public Dashboard {
   Q_OBJECT
 public:
   explicit UserDashboard(QWidget *parent = nullptr);
-  ~UserDashboard() override;
 
   SimulationWidget *simulation() const { return simulation_; }
 

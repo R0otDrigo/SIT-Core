@@ -1,34 +1,19 @@
 #include <QApplication>
-#include <QGuiApplication>
-#include <QQuickView>
 #include <QSettings>
-#include <QDebug>
-#include <QUrl>
 
 #include "view/mainwindow.h"
 
 int main(int argc, char *argv[]) {
-    QApplication a(argc, argv);
+    QApplication app(argc, argv);
     QCoreApplication::setOrganizationName("TecnologiaObjetos");
     QCoreApplication::setApplicationName("appTecnologiaObjetos");
 
-    // Firebase
-    QSettings settings(QCoreApplication::applicationDirPath() + "/config.ini",
-                       QSettings::IniFormat);
+    // Credenciales de Firebase: config.ini junto al ejecutable (no se sube a git).
+    QSettings config(QCoreApplication::applicationDirPath() + "/config.ini", QSettings::IniFormat);
 
-    qDebug() << QCoreApplication::applicationDirPath();
-    QString apiKey = settings.value("FIREBASE_API_KEY").toString();
-    QString projectId = settings.value("FIREBASE_PROJECT_ID").toString();
-
-    MainWindow w;
-    w.setApiConfig(apiKey, projectId);
-    w.show();
-
-    QQuickView view;
-
-    const QUrl url(u"view/openstreetmaps.qml"_qs);
-    view.setSource(url);
-
-    view.show();
-    return a.exec();
+    MainWindow window;
+    window.setApiConfig(config.value("FIREBASE_API_KEY").toString(),
+                        config.value("FIREBASE_PROJECT_ID").toString());
+    window.show();
+    return app.exec();
 }

@@ -2,8 +2,6 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QUrlQuery>
-#include <iostream>
-
 
 FirebaseAuthManager::FirebaseAuthManager(QObject *parent)
     : QObject(parent)
@@ -24,13 +22,11 @@ void FirebaseAuthManager::setProjectId(const QString &projectId)
 void FirebaseAuthManager::signIn(const QString &email, const QString &password)
 {
     if (m_apiKey.isEmpty()) {
-        std::cout << "Q ..." << std::endl;
         emit signInFailed("Firebase API key not configured");
         return;
     }
 
     QNetworkRequest request(QUrl(QString("https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=%1").arg(m_apiKey)));
-    //   QNetworkRequest registrarse(QUrl(QString("https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=%1").arg(m_apiKey)));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
     QJsonObject json;
@@ -45,14 +41,10 @@ void FirebaseAuthManager::signIn(const QString &email, const QString &password)
 
 void FirebaseAuthManager::signUp(const QString &email, const QString &password, const QString &role)
 {
-    qDebug() << "🔍 [1] signUp() llamado";  // ← ¿Se imprime?
     if (m_apiKey.isEmpty()) {
-
-        qDebug() << "🔍 [2] API KEY VACÍA, return early";  // ← ¿Se imprime?
-        emit signUpFailed("Firebase API key not configured");  // ← signal propio
+        emit signUpFailed("Firebase API key not configured");
         return;
     }
-
 
     m_user_role = role;
 
@@ -70,7 +62,7 @@ void FirebaseAuthManager::signUp(const QString &email, const QString &password, 
     json["returnSecureToken"] = true;
 
     QNetworkReply *reply = m_networkManager->post(request, QJsonDocument(json).toJson());
-    connect(reply, &QNetworkReply::finished, this, &FirebaseAuthManager::onSignUpReplyFinished);  // ← slot propio
+    connect(reply, &QNetworkReply::finished, this, &FirebaseAuthManager::onSignUpReplyFinished);
 }
 
 void FirebaseAuthManager::onSignUpReplyFinished()
@@ -85,17 +77,9 @@ void FirebaseAuthManager::onSignUpReplyFinished()
         return;
     }
 
-    QJsonObject data = QJsonDocument::fromJson(reply->readAll()).object();
-    QString m_idToken = data["idToken"].toString();
-    QString m_refreshToken = data["refreshToken"].toString();
-    QString m_uid = data["localId"].toString();
-
-    std::cout << "PASO POR SIGN UP RELLY" << std::endl;
-
-    qDebug() << "✅ onSignUpReplyFinished se ejecutó";  // ← si NO ves esto, es deleteLater
-    qDebug() << "Error:" << reply->error() << reply->errorString();
-    qDebug() << "Body:" << reply->readAll();
-
+    const QJsonObject data = QJsonDocument::fromJson(reply->readAll()).object();
+    m_idToken = data["idToken"].toString();
+    m_uid = data["localId"].toString();
 
     // Ahora vamos a crear un 'documento' de firestore para almacenar los usuarios con sus respectivos roles
     createFirestoreUser();
@@ -104,19 +88,18 @@ void FirebaseAuthManager::onSignUpReplyFinished()
 
 void FirebaseAuthManager::createFirestoreUser()
 {
-    // POST /v1/projects/{PROJECT_ID}/databases/(default)/documents/users/{UID}
-    QUrl url = QUrl(
-        QString("https://firestore.googleapis.com/v1/projects/%1/databases/(default)/documents/users/%2")
-            .arg(m_projectId, m_uid)
-    );
+    // PATCH crea (o reemplaza) el documento users/{UID}. Un POST a .../users/{UID} no es
+    // valido en la API REST de Firestore: POST solo crea documentos con ID automatico.
+    QUrl url(QString("https://firestore.googleapis.com/v1/projects/%1/databases/(default)/documents/users/%2")
+                 .arg(m_projectId, m_uid));
 
     QNetworkRequest request(url);
-    request.setRawHeader("Authorization", m_idToken.toUtf8());  // ← el token de Auth
+    request.setRawHeader("Authorization", "Bearer " + m_idToken.toUtf8());
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
     // El body de Firestore usa el formato "fields" con tipos explícitos
     QJsonObject roleField;
-    roleField["stringValue"] = m_user_role;  // ← "admin", "user", etc.
+    roleField["stringValue"] = m_user_role;  // "ADMIN", "USER" o "GUEST"
 
     QJsonObject fields;
     fields["role"] = roleField;
@@ -124,7 +107,7 @@ void FirebaseAuthManager::createFirestoreUser()
     QJsonObject body;
     body["fields"] = fields;
 
-    QNetworkReply *reply = m_networkManager->post(request, QJsonDocument(body).toJson());
+    QNetworkReply *reply = m_networkManager->sendCustomRequest(request, "PATCH", QJsonDocument(body).toJson());
     connect(reply, &QNetworkReply::finished, this, &FirebaseAuthManager::onFirestoreUserCreated);
 }
 

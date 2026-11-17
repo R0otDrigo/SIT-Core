@@ -1,5 +1,4 @@
 #pragma once
-#include <QCheckBox>
 #include <QComboBox>
 #include <QLabel>
 #include <QListWidget>
@@ -40,7 +39,6 @@ private:
     QLabel* transportedLabel_{};
     QLabel* abandonedLabel_{};
     QLabel* saturationLabel_{};
-    QLabel* eventsLabel_{};
     QPushButton* pauseButton_{};
     QComboBox* speedCombo_{};
     QComboBox* routeCombo_{};

@@ -9,16 +9,11 @@
 #include <string>
 #include "model/Snapshot.h"
 
-namespace Ui {
-class MapView;
-}
-
 // Vista del mapa: dibuja rutas, paraderos (color segun saturacion) y buses en movimiento.
 class MapView : public QGraphicsView {
     Q_OBJECT
 public:
     explicit MapView(QWidget* parent = nullptr);
-    ~MapView() override;
     void refresh(const sit::Snapshot& snapshot);
 
 protected:
@@ -39,7 +34,6 @@ private:
         bool trunk{};
     };
 
-    Ui::MapView* ui;
     QGraphicsScene scene_;
     bool built_{false};
     std::map<std::string, StopItem> stops_;

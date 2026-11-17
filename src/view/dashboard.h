@@ -3,30 +3,30 @@
 
 #include <QWidget>
 
-class QEvent;
+class QLabel;
+class QVBoxLayout;
 
-namespace Ui {
-class Dashboard;
-}
-
-class Dashboard : public QWidget
-{
+// Pagina base de cada rol (herencia + polimorfismo). Cada subclase define su titulo y
+// agrega su contenido en contentLayout(). Para un rol nuevo: heredar de Dashboard y
+// registrarlo en MainWindow.
+class Dashboard : public QWidget {
     Q_OBJECT
-
 public:
     explicit Dashboard(QWidget *parent = nullptr);
-    ~Dashboard() override;
 
     void retranslate();
 
 protected:
     void changeEvent(QEvent *event) override;
+    QVBoxLayout *contentLayout() const { return content_; }
 
     virtual QString dashboardTitle() const;
     virtual QString welcomeMessage() const;
 
 private:
-    Ui::Dashboard *ui;
+    QLabel *title_;
+    QLabel *welcome_;
+    QVBoxLayout *content_;
 };
 
 #endif // DASHBOARD_H

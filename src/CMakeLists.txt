@@ -9,43 +9,37 @@ target_include_directories(sit_model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(sit_model PUBLIC Threads::Threads)
 
 # ---------------------------------------------------------------------------
-# Controlador + vistas + autenticacion + aplicacion: solo si Qt6 esta instalado.
-# El .ui de cada vista se procesa con AUTOUIC y los Q_OBJECT con AUTOMOC.
+# Controlador + vistas + aplicacion: solo si Qt6 esta instalado.
 # ---------------------------------------------------------------------------
-find_package(Qt6 COMPONENTS Widgets Network QUIET)
+find_package(Qt6 6.2 COMPONENTS Widgets Network QUIET)
+if(NOT Qt6_FOUND)
+  message(STATUS "Qt6 no encontrado: se compila solo el modelo.")
+  return()
+endif()
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
 file(GLOB SIT_UI_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/controller/*.cpp
                                             ${CMAKE_CURRENT_SOURCE_DIR}/view/*.cpp)
-if(Qt6_FOUND AND SIT_UI_SOURCES AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
-  set(CMAKE_AUTOMOC ON)
-  set(CMAKE_AUTOUIC ON)
-  add_library(sit_ui STATIC ${SIT_UI_SOURCES})
-  target_include_directories(sit_ui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-  target_link_libraries(sit_ui PUBLIC sit_model Qt6::Widgets Qt6::Network Qt6::Quick)
-  target_compile_definitions(sit_ui PRIVATE SIT_DATA_DIR="${PROJECT_SOURCE_DIR}/data")
+add_library(sit_ui STATIC ${SIT_UI_SOURCES})
+target_include_directories(sit_ui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(sit_ui PUBLIC sit_model Qt6::Widgets Qt6::Network)
+target_compile_definitions(sit_ui PRIVATE SIT_DATA_DIR="${PROJECT_SOURCE_DIR}/data")
 
-  add_executable(sit_core main.cpp
-    interactive.qrc
-    map.qml
-  )
-  target_link_libraries(sit_core PRIVATE sit_ui)
-  target_compile_definitions(sit_core PRIVATE SIT_DATA_DIR="${PROJECT_SOURCE_DIR}/data")
+add_executable(sit_core main.cpp)
+target_link_libraries(sit_core PRIVATE sit_ui)
 
+# Traducciones (opcional, requiere Qt LinguistTools): se incrustan como recurso :/i18n/...
+find_package(Qt6 QUIET COMPONENTS LinguistTools)
+if(Qt6LinguistTools_FOUND)
+  file(GLOB SIT_TS_FILES ${PROJECT_SOURCE_DIR}/i18n/*.ts)
+  qt_add_translations(sit_core TS_FILES ${SIT_TS_FILES})
+endif()
 
-  # Traducciones: se incrustan como recurso :/i18n/... y se cargan en tiempo de ejecucion.
-  qt_add_translations(sit_core
-    TS_FILES
-      ${PROJECT_SOURCE_DIR}/TecnologiaObjetos_es_ES.ts
-      ${PROJECT_SOURCE_DIR}/TecnologiaObjetos_en_US.ts
-      ${PROJECT_SOURCE_DIR}/TecnologiaObjetos_zh_CN.ts
-      ${PROJECT_SOURCE_DIR}/TecnologiaObjetos_ar_SA.ts)
-
-  # Red de ejemplo + config.ini de Firebase junto al ejecutable.
+# Red de ejemplo (y config.ini de Firebase si existe) junto al ejecutable.
+add_custom_command(TARGET sit_core POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data $<TARGET_FILE_DIR:sit_core>/data)
+if(EXISTS ${PROJECT_SOURCE_DIR}/config.ini)
   add_custom_command(TARGET sit_core POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data $<TARGET_FILE_DIR:sit_core>/data)
-  add_custom_command(TARGET sit_core POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${PROJECT_SOURCE_DIR}/config.ini"
-        "$<TARGET_FILE_DIR:sit_core>/config.ini")
-else()
-  message(STATUS "Aplicacion grafica omitida (falta Qt6 o los archivos de controller/view/main.cpp).")
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_SOURCE_DIR}/config.ini $<TARGET_FILE_DIR:sit_core>/config.ini)
 endif()

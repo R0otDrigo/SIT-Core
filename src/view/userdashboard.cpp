@@ -14,13 +14,8 @@
 #define SIT_DATA_DIR "data"
 #endif
 
-UserDashboard::UserDashboard(QWidget *parent)
-    : Dashboard(parent)
-{
+UserDashboard::UserDashboard(QWidget *parent) : Dashboard(parent) {
     retranslate();
-
-    auto *layout = qobject_cast<QVBoxLayout *>(this->layout());
-    if (!layout) return;
 
     // El archivo de red se copia junto al ejecutable (build/src/data/network.csv).
     QString path = QDir(QCoreApplication::applicationDirPath()).filePath("data/network.csv");
@@ -28,22 +23,14 @@ UserDashboard::UserDashboard(QWidget *parent)
 
     try {
         simulation_ = new SimulationWidget(SimulationController::loadNetwork(path), this);
-        layout->addWidget(simulation_, 1);
+        contentLayout()->addWidget(simulation_);
     } catch (const sit::SitException &e) {
         auto *error = new QLabel(tr("No se pudo cargar la red:\n%1").arg(e.what()), this);
         error->setWordWrap(true);
-        layout->addWidget(error, 1);
+        contentLayout()->addWidget(error);
     }
 }
 
-UserDashboard::~UserDashboard() = default;
+QString UserDashboard::dashboardTitle() const { return tr("Espacio de Trabajo"); }
 
-QString UserDashboard::dashboardTitle() const
-{
-    return tr("Espacio de Trabajo");
-}
-
-QString UserDashboard::welcomeMessage() const
-{
-    return tr("Bienvenido Usuario");
-}
+QString UserDashboard::welcomeMessage() const { return tr("Bienvenido Usuario"); }

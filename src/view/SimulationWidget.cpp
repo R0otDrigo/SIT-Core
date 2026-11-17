@@ -18,23 +18,18 @@ SimulationWidget::SimulationWidget(std::unique_ptr<sit::Network> network, QWidge
 }
 
 void SimulationWidget::buildUi() {
-    setWindowTitle("SIT-Core - Simulador de transporte publico (Arequipa)");
-    resize(1320, 780);
-    setStyleSheet(
-        "QGroupBox{font-weight:bold;border:1px solid #cbd5e1;border-radius:6px;margin-top:10px;padding-top:6px;}"
-        "QGroupBox::title{subcontrol-origin:margin;left:10px;padding:0 4px;}");
-
     auto* root = new QHBoxLayout(this);
+    root->setContentsMargins(0, 0, 0, 0);
     map_ = new MapView;
     root->addWidget(map_, 1);
 
     auto* side = new QWidget;
-    side->setFixedWidth(380);
+    side->setFixedWidth(340);
     auto* col = new QVBoxLayout(side);
     col->setContentsMargins(0, 0, 0, 0);
 
     clockLabel_ = new QLabel("Hora simulada --:--");
-    QFont big = clockLabel_->font(); big.setPointSize(20); big.setBold(true);
+    QFont big = clockLabel_->font(); big.setPointSize(14); big.setBold(true);
     clockLabel_->setFont(big);
     col->addWidget(clockLabel_);
 
@@ -58,13 +53,10 @@ void SimulationWidget::buildUi() {
     transportedLabel_ = new QLabel("-");
     abandonedLabel_ = new QLabel("-");
     saturationLabel_ = new QLabel("-");
-    eventsLabel_ = new QLabel("Sin eventos");
-    eventsLabel_->setWordWrap(true);
     kpi->addWidget(new QLabel("Buses en servicio:"), 0, 0);       kpi->addWidget(busesLabel_, 0, 1);
     kpi->addWidget(new QLabel("Pasajeros transportados:"), 1, 0); kpi->addWidget(transportedLabel_, 1, 1);
     kpi->addWidget(new QLabel("Pasajeros que desistieron:"), 2, 0); kpi->addWidget(abandonedLabel_, 2, 1);
     kpi->addWidget(new QLabel("Saturacion media:"), 3, 0);        kpi->addWidget(saturationLabel_, 3, 1);
-    kpi->addWidget(eventsLabel_, 4, 0, 1, 2);
     col->addWidget(kpiBox);
 
     // --- Acciones del controlador de flota ---
@@ -150,15 +142,6 @@ void SimulationWidget::onSnapshot(const sit::Snapshot& s) {
     transportedLabel_->setText(QString::number(s.stats.transported));
     abandonedLabel_->setText(QString::number(s.stats.abandoned));
     saturationLabel_->setText(QString("%1 %").arg(s.stats.avgSaturation * 100.0, 0, 'f', 0));
-    if (s.events.empty()) {
-        eventsLabel_->setText("Sin eventos de trafico activos");
-    } else {
-        QStringList parts;
-        for (const auto& e : s.events)
-            parts << QString("%1 en %2 (%3 s)").arg(QString::fromStdString(e.name), QString::fromStdString(e.routeId))
-                         .arg(static_cast<int>(e.remaining));
-        eventsLabel_->setText("Eventos: " + parts.join(", "));
-    }
 
     // Tabla de paraderos: los mas saturados primero (lambda de ordenamiento).
     std::vector<sit::StopView> stops = s.stops;

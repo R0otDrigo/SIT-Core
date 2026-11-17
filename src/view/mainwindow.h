@@ -9,7 +9,6 @@ class Login;
 class AdminDashboard;
 class UserDashboard;
 class GuestDashboard;
-class QEvent;
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -17,13 +16,14 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
+// Ventana principal: menu de idioma/sesion y un QStackedWidget con una pagina por rol.
 class MainWindow : public QMainWindow {
     Q_OBJECT
 public:
-
-    void setApiConfig(const QString &api, const QString &id);
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
+
+    void setApiConfig(const QString &apiKey, const QString &projectId);
 
 protected:
     void changeEvent(QEvent *event) override;
@@ -34,6 +34,8 @@ private slots:
     void onLanguageSelected(const QString &locale);
 
 private:
+    enum Page { LoginPage, AdminPage, UserPage, GuestPage };
+
     Ui::MainWindow *ui;
     QStackedWidget *stack;
     Login *loginPage;
@@ -42,7 +44,7 @@ private:
     GuestDashboard *guestPage;
     QTranslator *translator;
 
-    void showPage(int index);
+    void showPage(Page page);
     void applyLanguage(const QString &locale);
     void selectLanguageAction(const QString &locale);
     static QString supportedLocale(const QString &locale);
