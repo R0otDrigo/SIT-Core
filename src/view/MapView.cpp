@@ -2,6 +2,7 @@
 #include <QBrush>
 #include <QFont>
 #include <QLineF>
+#include <QMouseEvent>
 #include <QPainter>
 #include <QPen>
 #include <QSet>
@@ -38,6 +39,7 @@ void MapView::build(const sit::Snapshot& snap) {
 
     // Rutas (debajo de todo).
     for (const auto& r : snap.routes) {
+        routeNames_[r.id] = QString::fromStdString(r.name);
         QPainterPath path;
         bool first = true;
         for (const auto& id : r.stopIds) {
@@ -130,6 +132,7 @@ void MapView::placeLabels(const sit::Snapshot& snap, const std::map<std::string,
 
 void MapView::refresh(const sit::Snapshot& snap) {
     if (!built_) build(snap);
+    currentVehicles_.clear();
 
     // Rutas afectadas por eventos: linea roja discontinua.
     QSet<QString> affected;
@@ -167,14 +170,18 @@ void MapView::refresh(const sit::Snapshot& snap) {
     QSet<int> alive;
     for (const auto& v : snap.vehicles) {
         alive.insert(v.id);
+        currentVehicles_[v.id] = v;
         auto it = vehicles_.find(v.id);
         if (it == vehicles_.end()) {
             const double w = 12.0 + v.capacity / 16.0;
             auto* rect = scene_.addRect(-w / 2, -6, w, 12, QPen(Qt::black, 1.5));
             rect->setZValue(3);
+            rect->setData(0, v.id);
+            rect->setCursor(Qt::PointingHandCursor);
             auto rc = routes_.find(v.routeId);
             rect->setBrush(rc != routes_.end() ? rc->second.color : QColor(Qt::gray));
             auto* txt = new QGraphicsSimpleTextItem(rect);
+            txt->setCursor(Qt::PointingHandCursor);
             txt->setBrush(Qt::white);
             QFont f = txt->font(); f.setPointSize(7); f.setBold(true); txt->setFont(f);
             it = vehicles_.emplace(v.id, rect).first;
@@ -193,6 +200,30 @@ void MapView::refresh(const sit::Snapshot& snap) {
         if (!alive.contains(it->first)) { scene_.removeItem(it->second); delete it->second; it = vehicles_.erase(it); }
         else ++it;
     }
+}
+
+void MapView::mousePressEvent(QMouseEvent* event) {
+    if (event->button() == Qt::LeftButton) {
+        for (QGraphicsItem* item = itemAt(event->pos()); item; item = item->parentItem()) {
+            auto* rect = dynamic_cast<QGraphicsRectItem*>(item);
+            if (!rect || !rect->data(0).isValid()) continue;
+            const int id = rect->data(0).toInt();
+            const auto drawing = vehicles_.find(id);
+            const auto vehicle = currentVehicles_.find(id);
+            if (drawing == vehicles_.end() || drawing->second != rect || vehicle == currentVehicles_.end()) continue;
+
+            const auto& v = vehicle->second;
+            const auto routeName = routeNames_.find(v.routeId);
+            QString route = QString::fromStdString(v.routeId);
+            if (routeName != routeNames_.end())
+                route += QStringLiteral(" - ") + routeName->second;
+            emit busClicked(v.id, QString::fromStdString(v.type), route,
+                            v.passengers, v.capacity, v.dwelling);
+            event->accept();
+            return;
+        }
+    }
+    QGraphicsView::mousePressEvent(event);
 }
 
 void MapView::resizeEvent(QResizeEvent* event) {

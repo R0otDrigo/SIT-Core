@@ -5,6 +5,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsSimpleTextItem>
 #include <QGraphicsView>
+#include <QString>
 #include <map>
 #include <string>
 #include "model/Snapshot.h"
@@ -16,7 +17,12 @@ public:
     explicit MapView(QWidget* parent = nullptr);
     void refresh(const sit::Snapshot& snapshot);
 
+signals:
+    void busClicked(int id, const QString& type, const QString& route,
+                    int passengers, int capacity, bool dwelling);
+
 protected:
+    void mousePressEvent(QMouseEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
 
 private:
@@ -39,5 +45,7 @@ private:
     std::map<std::string, StopItem> stops_;
     std::map<std::string, RouteItem> routes_;
     std::map<int, QGraphicsRectItem*> vehicles_;
+    std::map<int, sit::VehicleView> currentVehicles_;
+    std::map<std::string, QString> routeNames_;
     QGraphicsSimpleTextItem* eventBanner_{};
 };

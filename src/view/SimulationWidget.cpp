@@ -3,6 +3,7 @@
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QMessageBox>
 #include <QVBoxLayout>
 #include <algorithm>
 #include <vector>
@@ -22,6 +23,16 @@ void SimulationWidget::buildUi() {
     root->setContentsMargins(0, 0, 0, 0);
     map_ = new MapView;
     root->addWidget(map_, 1);
+    connect(map_, &MapView::busClicked, this,
+            [this](int id, const QString& type, const QString& route,
+                   int passengers, int capacity, bool dwelling) {
+        const QString details = tr("Tipo: %1\nRuta: %2\nPasajeros: %3/%4\nEstado: %5")
+            .arg(type, route)
+            .arg(passengers)
+            .arg(capacity)
+            .arg(dwelling ? tr("Detenido en paradero") : tr("En marcha"));
+        QMessageBox::information(this, tr("Bus #%1").arg(id), details);
+    });
 
     auto* side = new QWidget;
     side->setFixedWidth(340);
