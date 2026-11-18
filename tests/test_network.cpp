@@ -31,6 +31,7 @@ int main() {
     // --- Un bus recorre la ruta y recoge pasajeros ---
     Vehicle& bus = net->addVehicle(VehicleType::Conventional, "T", 0);
     CHECK(bus.position() == (Position{0, 0}));
+    CHECK(net->snapshot().vehicles.front().nextStopName == "B");
     net->stops().byId("B")->addWaiting(30);
     for (int i = 0; i < 40; ++i) net->step(0.5);            // 20 s: 100u / 10 u/s = 10 s hasta B
     CHECK(bus.passengers() > 0);                            // subio gente en B
@@ -38,6 +39,7 @@ int main() {
 
     // --- Limite de flota ---
     net->addVehicle(VehicleType::Feeder, "F");
+    CHECK(net->snapshot().vehicles.back().nextStopName == "B");
     CHECK_THROWS(net->addVehicle(VehicleType::Conventional, "T"), FleetLimitExceededException);
     CHECK(net->activeVehicles() == 2);
 

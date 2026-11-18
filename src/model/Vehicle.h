@@ -30,6 +30,7 @@ public:
     void assignRoute(const std::shared_ptr<Route>& route, std::size_t startIndex = 0);
     std::shared_ptr<Route> route() const { return route_.lock(); }
     std::shared_ptr<Stop> targetStop() const;   // proximo paradero (o el actual si esta detenido)
+    std::shared_ptr<Stop> nextStop() const;     // siguiente paradero despues de la parada actual
     bool atRouteEnd() const;                    // el paradero objetivo es un extremo de la ruta
 
     // Avanza dt segundos (speedFactor <1 = trafico lento). Devuelve true si acaba de llegar
