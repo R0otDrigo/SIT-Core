@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
     app.exec();
 
     CHECK(snapshots > 3);
-    CHECK(window.stopsTable()->rowCount() == 15);
+    CHECK(window.stopsTable()->rowCount() == 288);
     CHECK(window.mapWidget() != nullptr);
     CHECK(window.mapWidget()->status() == QQuickWidget::Ready);
     CHECK(window.mapWidget()->errors().isEmpty());

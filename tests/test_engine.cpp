@@ -24,10 +24,10 @@ int main() {
         auto snap = engine.snapshot();
         CHECK_NEAR(snap.simTime, 60.0, 1e-6);
         CHECK(snap.strategy == "Manual");
-        engine.dispatch("T1", VehicleType::Conventional);
-        CHECK(engine.snapshot().stats.activeVehicles == 7);
+        engine.dispatch("17643070", VehicleType::Conventional);
+        CHECK(engine.snapshot().stats.activeVehicles == 13);
         CHECK_THROWS(engine.dispatch("NOPE", VehicleType::Conventional), InvalidRouteException);
-        CHECK_THROWS(engine.dispatch("A1", VehicleType::Articulated), InvalidRouteException);
+        CHECK_THROWS(engine.dispatch("17518939", VehicleType::Articulated), InvalidRouteException);
     }
 
     // --- Con hilos: el tiempo avanza, el observador recibe snapshots, stop() es limpio ---
@@ -49,7 +49,7 @@ int main() {
         std::thread other([&] {
             for (int i = 0; i < 20; ++i) { engine.snapshot(); engine.setSpeed(5.0 + i); std::this_thread::sleep_for(5ms); }
         });
-        engine.triggerEvent(EventType::Accident, "T1");
+        engine.triggerEvent(EventType::Accident, "17643070");
         other.join();
 
         // Pausa: el reloj se congela.

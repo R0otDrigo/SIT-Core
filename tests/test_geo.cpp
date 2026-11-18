@@ -32,23 +32,28 @@ int main() {
     CHECK(legacy.geoBounds().second.isValid());
     CHECK(legacy.geoCenter().isValid());
     CHECK(legacy.geoFor(Position{50, 20}).isValid());
+    const Position roundTrip = legacy.positionFor(legacy.geoFor(Position{50, 20}));
+    CHECK_NEAR(roundTrip.x, 50.0, 1e-6);
+    CHECK_NEAR(roundTrip.y, 20.0, 1e-6);
 
     // --- Red real con columnas LAT/LON ---
     CsvRouteAdapter csv(std::string(SIT_DATA_DIR) + "/network.csv");
     NetworkData data = csv.load();
-    CHECK(data.stops.size() == 15);
+    CHECK(data.stops.size() == 288);
     CHECK(data.stops.front().geo.isValid());
 
     auto network = NetworkBuilder().withData(data).build();
-    CHECK(network->stops().byId("PLA")->hasGeo());
-    CHECK_NEAR(network->stops().byId("PLA")->geoPosition().latitude, -16.3989, 1e-6);
-    CHECK(network->routes().byId("T1")->hasGeo());
-    CHECK(network->routes().byId("T1")->waypoints().size() == 6);
-    CHECK(network->routes().byId("T1")->geoLength() > 0.0);
+    CHECK(network->stops().byId("10270810751")->hasGeo());
+    CHECK_NEAR(network->stops().byId("10270810751")->geoPosition().latitude, -16.4044512, 1e-6);
+    CHECK_NEAR(network->stops().byId("10270810751")->geoPosition().longitude, -71.4896626, 1e-6);
+    CHECK(network->routes().byId("17643070")->hasGeo());
+    CHECK(network->routes().byId("17643070")->waypoints().size() == 36);
+    CHECK(network->routes().byId("17643070")->geoLength() > 0.0);
+    CHECK(network->routes().byId("17643070")->hasPath());
 
     const Snapshot snap = network->snapshot();
     CHECK(!snap.stops.empty() && snap.stops.front().geo.isValid());
-    CHECK(!snap.routes.empty() && snap.routes.front().waypoints.size() == 6);
+    CHECK(!snap.routes.empty() && snap.routes.front().waypoints.size() == 36);
     CHECK(!snap.vehicles.empty() && snap.vehicles.front().geo.isValid());
     return 0;
 }
