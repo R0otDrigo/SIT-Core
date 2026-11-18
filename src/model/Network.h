@@ -60,6 +60,7 @@ public:
     // y completa los que no las tengan. Es idempotente; NetworkBuilder la llama al armar la red.
     void calibrateGeo();
     GeoCoordinate geoFor(const Position& p) const;
+    Position positionFor(const GeoCoordinate& geo) const;
     std::pair<GeoCoordinate, GeoCoordinate> geoBounds() const;   // (min, max)
     GeoCoordinate geoCenter() const;
 

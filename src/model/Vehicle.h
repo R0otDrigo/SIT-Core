@@ -42,6 +42,7 @@ public:
     int passengers() const { return passengers_; }
     int freeSeats() const { return capacity() - passengers_; }
     const Position& position() const { return pos_; }
+    double pathDistance() const { return pathDistance_; }
     VehicleState state() const { return state_; }
 
 private:
@@ -49,6 +50,7 @@ private:
 
     int id_;
     Position pos_;
+    double pathDistance_{0.0};
     int passengers_{0};
     std::weak_ptr<Route> route_;            // la ruta es de la Network; el bus solo la observa
     std::size_t index_{0};                  // indice del paradero objetivo

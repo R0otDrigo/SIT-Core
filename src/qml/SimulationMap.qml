@@ -52,12 +52,12 @@ Item {
             }
         }
 
-        // Rutas de la simulacion: cada una tiene su propio RouteQuery + RouteModel.
+        // Rutas de la simulacion: el bus y la polilinea usan el mismo PATH del CSV/GTFS.
         MapItemView {
             model: mapBridge.routeModel
             delegate: RouteLayer {
-                mapPlugin: osmPlugin
                 routeWaypoints: model.waypoints
+                routePath: model.path
                 routeColor: model.color
                 routeTrunk: model.trunk
                 routeAffected: model.affected

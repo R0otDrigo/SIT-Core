@@ -85,6 +85,19 @@ GeoCoordinate Network::geoFor(const Position& p) const {
     return out.isValid() ? out : fallback;
 }
 
+Position Network::positionFor(const GeoCoordinate& geo) const {
+    const double metersPerDegreeLon =
+        metersPerDegreeLat * std::cos(fallbackOriginLat * 3.14159265358979323846 / 180.0);
+    double x = (geo.longitude - fallbackOriginLon) * metersPerDegreeLon / fallbackMetersPerUnit;
+    double y = (fallbackOriginLat - geo.latitude) * metersPerDegreeLat / fallbackMetersPerUnit;
+    if (!geo.isValid()) return {x, y};
+    if (calibration_.lonReady && std::abs(calibration_.slopeLon) > 1e-12)
+        x = (geo.longitude - calibration_.interceptLon) / calibration_.slopeLon;
+    if (calibration_.latReady && std::abs(calibration_.slopeLat) > 1e-12)
+        y = (geo.latitude - calibration_.interceptLat) / calibration_.slopeLat;
+    return {x, y};
+}
+
 std::pair<GeoCoordinate, GeoCoordinate> Network::geoBounds() const {
     GeoCoordinate min{90.0, 180.0};
     GeoCoordinate max{-90.0, -180.0};
@@ -251,6 +264,7 @@ Snapshot Network::snapshot() const {
         v.trunk = r->kind() == RouteKind::Trunk;
         for (const auto& st : r->stops()) v.stopIds.push_back(st->id());
         v.waypoints = r->waypoints();
+        for (const auto& point : r->path()) v.path.push_back(geoFor(point));
         s.routes.push_back(std::move(v));
     }
     for (const auto& b : vehicles_) {

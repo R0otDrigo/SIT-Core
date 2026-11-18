@@ -36,6 +36,7 @@ struct RouteView {
     bool trunk{};
     std::vector<std::string> stopIds;
     std::vector<GeoCoordinate> waypoints;
+    std::vector<GeoCoordinate> path;
 };
 
 struct EventView {

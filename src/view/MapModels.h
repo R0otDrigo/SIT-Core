@@ -19,7 +19,8 @@ public:
         ColorRole,
         TrunkRole,
         WaypointsRole,
-        AffectedRole
+        AffectedRole,
+        PathRole
     };
 
     explicit RouteListModel(QObject* parent = nullptr) : QAbstractListModel(parent) {}
@@ -39,6 +40,7 @@ private:
         bool trunk{};
         bool affected{};
         QVariantList waypoints;
+        QVariantList path;
     };
     std::vector<Row> rows_;
 };

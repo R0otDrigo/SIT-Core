@@ -20,7 +20,8 @@ QVariantList toCoordinates(const sit::GtfsRoute& route) {
 
 QVector<int> routeRoles() {
     return {RouteListModel::RouteIdRole, RouteListModel::NameRole, RouteListModel::ColorRole,
-            RouteListModel::TrunkRole, RouteListModel::WaypointsRole, RouteListModel::AffectedRole};
+            RouteListModel::TrunkRole, RouteListModel::WaypointsRole, RouteListModel::AffectedRole,
+            RouteListModel::PathRole};
 }
 
 QVector<int> stopRoles() {
@@ -61,13 +62,15 @@ QVariant RouteListModel::data(const QModelIndex& index, int role) const {
     case TrunkRole: return row.trunk;
     case WaypointsRole: return row.waypoints;
     case AffectedRole: return row.affected;
+    case PathRole: return row.path;
     default: return {};
     }
 }
 
 QHash<int, QByteArray> RouteListModel::roleNames() const {
-    return {{RouteIdRole, "routeId"},     {NameRole, "name"},         {ColorRole, "color"},
-            {TrunkRole, "trunk"},         {WaypointsRole, "waypoints"}, {AffectedRole, "affected"}};
+    return {{RouteIdRole, "routeId"},     {NameRole, "name"},           {ColorRole, "color"},
+            {TrunkRole, "trunk"},         {WaypointsRole, "waypoints"}, {AffectedRole, "affected"},
+            {PathRole, "path"}};
 }
 
 void RouteListModel::resetFrom(const std::vector<sit::RouteView>& routes) {
@@ -81,6 +84,7 @@ void RouteListModel::resetFrom(const std::vector<sit::RouteView>& routes) {
         row.color = QString::fromStdString(route.color);
         row.trunk = route.trunk;
         row.waypoints = toCoordinates(route.waypoints);
+        row.path = toCoordinates(route.path);
         rows_.push_back(std::move(row));
     }
     endResetModel();

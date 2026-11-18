@@ -7,8 +7,11 @@ alimentadoras de Arequipa). Proyecto final de Tecnologia de Objetos — UNSA, Ar
 
 ## Que hace la Demo 1
 
-- Mapa OSM en vivo (Qt Quick + Qt Location) con 2 rutas **troncales** (T1, T2) y 2 **alimentadoras** (A1, A2), 15 paraderos.
-- Trazados reales de 227 rutas importados de GTFS (`data/routes.txt`, `trips.txt`, `shapes.txt`).
+- Mapa OSM en vivo (Qt Quick + Qt Location) con 9 rutas derivadas de GTFS (3 **troncales** y 6
+  **alimentadoras**) y 288 paraderos, generadas en `data/network.csv` desde `stops.txt`, `routes.txt`,
+  `trips.txt`, `stop_times.txt` y `shapes.txt`.
+- Trazados reales de 227 rutas importados de GTFS (`data/routes.txt`, `trips.txt`, `shapes.txt`);
+  cada ruta simulada referencia su propio `route_id` de GTFS y `CsvRouteAdapter` usa su shape.
 - 3 tipos de bus (convencional, articulado, alimentador) con distinta capacidad y velocidad.
 - Pasajeros que llegan segun la hora (horas punta 8:00 y 18:00); reloj simulado desde las 06:00.
   Un paradero desbordado rechaza gente ("desistieron").
@@ -22,8 +25,9 @@ segundo hilo, adapter JSON + factory de fuentes, documentacion final (UML, infor
 ## Compilar y ejecutar
 
 Requisitos: CMake >= 3.16, compilador C++17 y Qt 6 (Widgets, Quick, QuickWidgets,
-Qml, Positioning y Location). El mapa y las rutas OSRM necesitan conexion a internet;
-si OSRM falla se dibuja una polilinea de respaldo entre los paraderos.
+Qml, Positioning y Location). El mapa base necesita conexion a internet; el trazado de
+cada ruta y el movimiento de los buses usan los puntos `PATH` del CSV (o un shape GTFS
+como respaldo), por lo que no dependen de OSRM.
 
 ```bash
 sudo apt install cmake g++ libgl1-mesa-dev \
@@ -33,11 +37,14 @@ sudo apt install cmake g++ libgl1-mesa-dev \
 cmake -S . -B build
 cmake --build build -j
 ./build/src/sit_core                          # abre la aplicacion
-ctest --test-dir build --output-on-failure    # 10 pruebas
+ctest --test-dir build --output-on-failure    # 11 pruebas
 ```
 
 `data/network.csv` acepta filas `STOP` de 7 columnas (x/y) o de 9 columnas con
 `lat,lon` opcionales; si faltan, la red calibra una proyeccion lineal desde x/y.
+Las filas `PATH,ruta,x,y[,lat,lon]` definen el trazado ordenado que recorren los buses.
+Si una ruta no tiene `PATH` y su fila `ROUTE` incluye un `shapeId` GTFS, se usa
+`data/shapes.txt` como respaldo; sin ninguno de los dos el bus va directo entre paraderos.
 
 Windows / macOS: instalar Qt 6 y pasar `-DCMAKE_PREFIX_PATH=<ruta de Qt>` (o abrir en Qt Creator).
 Sin Qt, CMake compila solo el modelo y las pruebas que no usan interfaz.
