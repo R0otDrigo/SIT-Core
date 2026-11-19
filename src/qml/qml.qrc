@@ -4,5 +4,7 @@
         <file>RouteLayer.qml</file>
         <file>StopMarker.qml</file>
         <file>VehicleMarker.qml</file>
+        <file>user.qml</file>
+        <file>UserInfoDialog.qml</file>
     </qresource>
 </RCC>

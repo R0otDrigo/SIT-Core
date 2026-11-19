@@ -71,7 +71,7 @@ void Login::onSignInSuccess(const QString &localId, const QString &idToken,
   ui->loginButton->setEnabled(true);
   ui->info->setText("");
   // accept(); // What does that ... o.o
-  emit loginSuccessful(role);
+  emit loginSuccessful(localId, role);
 }
 
 void Login::onSignInFailed(const QString &error) {

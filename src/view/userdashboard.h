@@ -3,22 +3,29 @@
 
 #include "dashboard.h"
 
-class SimulationWidget;
+class UserBroadcast;
+class UserWidget;
 
 class UserDashboard : public Dashboard {
   Q_OBJECT
-public:
+ public:
   explicit UserDashboard(QWidget *parent = nullptr);
   ~UserDashboard() override;
 
-  SimulationWidget *simulation() const { return simulation_; }
+  // Carga user.qml para el uid autenticado; el simulador completo nunca se crea aqui.
+  void initializeSession(const QString &userId);
+  void setBroadcast(UserBroadcast *broadcast);
+  void resetSession();
 
-protected:
+  UserWidget *userWidget() const { return userWidget_; }
+
+ protected:
   QString dashboardTitle() const override;
   QString welcomeMessage() const override;
 
-private:
-  SimulationWidget *simulation_ = nullptr;
+ private:
+  UserWidget *userWidget_ = nullptr;
+  UserBroadcast *broadcast_ = nullptr;
 };
 
 #endif // USERDASHBOARD_H

@@ -54,6 +54,7 @@ void SignUp::retranslate() { ui->retranslateUi(this); }
 void SignUp::onSignUpClicked() {
   QString email = ui->correoElectronicoLineEdit->text().trimmed();
   QString password = ui->contraseALineEdit->text();
+  QString username = ui->nombreDeUsuarioLineEdit->text();
   QString role = ui->rolComboBox->currentText();
 
   if (email.isEmpty() || password.isEmpty()) {
@@ -63,7 +64,8 @@ void SignUp::onSignUpClicked() {
 
   ui->info->setText(tr("Registrando..."));
   ui->confirmButton->setEnabled(false);
-  m_authManager->signUp(email, password, role);
+  qDebug() << email << password << role << username;
+  m_authManager->signUp(email, password, role, username);
 }
 
 void SignUp::onSignUpSuccess() {
