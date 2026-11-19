@@ -78,6 +78,9 @@ signals:
     void callChanged();
     void callAnswered(QString vehicleId);
     void callRequested(QString vehicleId);
+    void busSelected(int id, const QString& type, const QString& route,
+                     int passengers, int capacity, bool dwelling,
+                     const QString& nextStop);
 
 private:
     void updateViewFrom(const sit::Snapshot& snapshot);

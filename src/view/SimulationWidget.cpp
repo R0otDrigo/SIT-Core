@@ -15,7 +15,6 @@
 #include "model/TrafficEvent.h"
 #include "model/VehicleFactory.h"
 #include "view/MapBridge.h"
-#include "view/MapView.h"
 
 SimulationWidget::SimulationWidget(std::unique_ptr<sit::Network> network, QWidget* parent) : QWidget(parent) {
     controller_ = new SimulationController(std::move(network), this);
@@ -37,7 +36,7 @@ void SimulationWidget::buildUi() {
     map_->setMinimumSize(480, 360);
     map_->rootContext()->setContextProperty("mapBridge", mapBridge_);
     root->addWidget(map_, 1);
-    connect(map_, &MapView::busClicked, this,
+    connect(mapBridge_, &MapBridge::busSelected, this,
             [this](int id, const QString& type, const QString& route,
                    int passengers, int capacity, bool dwelling, const QString& nextStop) {
         selectedBusId_ = id;
@@ -202,6 +201,29 @@ void SimulationWidget::onSnapshot(const sit::Snapshot& s) {
     if (!routesLoaded_) populateRoutes(s);
     mapBridge_->update(s);
 
+    if (selectedBusId_ >= 0) {
+        const auto bus = std::find_if(s.vehicles.begin(), s.vehicles.end(),
+                                      [this](const sit::VehicleView& v) {
+                                          return v.id == selectedBusId_;
+                                      });
+        if (bus == s.vehicles.end()) {
+            clearBusInfo();
+        } else {
+            QString route = QString::fromStdString(bus->routeId);
+            const auto routeInfo = std::find_if(
+                s.routes.begin(), s.routes.end(),
+                [bus](const sit::RouteView& r) { return r.id == bus->routeId; });
+            if (routeInfo != s.routes.end()) {
+                route = QStringLiteral("%1 - %2")
+                            .arg(QString::fromStdString(routeInfo->id),
+                                 QString::fromStdString(routeInfo->name));
+            }
+            showBusInfo(bus->id, QString::fromStdString(bus->type), route,
+                        bus->passengers, bus->capacity, bus->dwelling,
+                        QString::fromStdString(bus->nextStopName));
+        }
+    }
+
     clockLabel_->setText(QString("Hora simulada %1%2").arg(QString::fromStdString(s.clock), s.paused ? "  (pausa)" : ""));
     busesLabel_->setText(QString("%1 / %2").arg(s.stats.activeVehicles).arg(s.stats.fleetLimit));
     transportedLabel_->setText(QString::number(s.stats.transported));
@@ -246,7 +268,7 @@ void SimulationWidget::showBusInfo(int id, const QString& type, const QString& r
 
 void SimulationWidget::clearBusInfo() {
     selectedBusId_ = -1;
-    map_->clearSelection();
+    mapBridge_->clearSelection();
     busInfoPanel_->setTitle(tr("Información del bus"));
     busInfoPanel_->hide();
 }
