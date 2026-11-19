@@ -100,6 +100,9 @@ int main(int argc, char** argv) {
     view.refresh(snapshot);
     CHECK(secondDrawing->scenePos().x() == 220);
     CHECK(secondDrawing->pen().color() == QColor("#f59e0b"));
+    view.clearSelection();
+    CHECK(secondDrawing->pen().color() == QColor(Qt::black));
+    CHECK(secondDrawing->zValue() == 3);
 
     click(view, QPointF(300, 200));
     click(view, drawing->scenePos(), Qt::RightButton);

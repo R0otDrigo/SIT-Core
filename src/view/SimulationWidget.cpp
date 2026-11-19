@@ -56,8 +56,10 @@ void SimulationWidget::buildUi() {
     busInfoPanel_ = new QGroupBox(tr("Información del bus"));
     busInfoPanel_->setObjectName("busInfoPanel");
     auto* busLayout = new QVBoxLayout(busInfoPanel_);
-    busInfoHint_ = new QLabel(tr("Selecciona un bus en el mapa"));
-    busLayout->addWidget(busInfoHint_);
+    backToOverviewButton_ = new QPushButton(tr("Volver al resumen"));
+    backToOverviewButton_->setObjectName("backToOverviewButton");
+    busLayout->addWidget(backToOverviewButton_, 0, Qt::AlignRight);
+    connect(backToOverviewButton_, &QPushButton::clicked, this, [this] { clearBusInfo(); });
     busInfoDetails_ = new QWidget;
     busInfoDetails_->setObjectName("busInfoDetails");
     auto* busFields = new QFormLayout(busInfoDetails_);
@@ -84,8 +86,8 @@ void SimulationWidget::buildUi() {
     busFields->addRow(tr("Próximo paradero:"), busNextStopLabel_);
     busFields->addRow(tr("Ocupación:"), busOccupancyBar_);
     busLayout->addWidget(busInfoDetails_);
-    busInfoDetails_->hide();
     col->addWidget(busInfoPanel_);
+    busInfoPanel_->hide();
 
     // --- Simulacion ---
     auto* simBox = new QGroupBox("Simulacion");
@@ -231,8 +233,7 @@ void SimulationWidget::onSnapshot(const sit::Snapshot& s) {
 void SimulationWidget::showBusInfo(int id, const QString& type, const QString& route,
                                    int passengers, int capacity, bool dwelling, const QString& nextStop) {
     busInfoPanel_->setTitle(tr("Bus #%1").arg(id));
-    busInfoHint_->hide();
-    busInfoDetails_->show();
+    busInfoPanel_->show();
     busTypeLabel_->setText(type);
     busRouteLabel_->setText(route);
     busPassengersLabel_->setText(tr("%1 / %2").arg(passengers).arg(capacity));
@@ -242,11 +243,11 @@ void SimulationWidget::showBusInfo(int id, const QString& type, const QString& r
     busOccupancyBar_->setValue(capacity > 0 ? std::clamp(100 * passengers / capacity, 0, 100) : 0);
 }
 
-void SimulationWidget::clearBusInfo(const QString& message) {
+void SimulationWidget::clearBusInfo() {
+    selectedBusId_ = -1;
+    map_->clearSelection();
     busInfoPanel_->setTitle(tr("Información del bus"));
-    busInfoDetails_->hide();
-    busInfoHint_->setText(message);
-    busInfoHint_->show();
+    busInfoPanel_->hide();
 }
 
 void SimulationWidget::addLog(const QString& line) {

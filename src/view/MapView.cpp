@@ -213,6 +213,10 @@ void MapView::setSelectedBus(int id) {
     }
 }
 
+void MapView::clearSelection() {
+    setSelectedBus(-1);
+}
+
 void MapView::mousePressEvent(QMouseEvent* event) {
     if (event->button() == Qt::LeftButton) {
         for (QGraphicsItem* item = itemAt(event->pos()); item; item = item->parentItem()) {

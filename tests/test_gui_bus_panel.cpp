@@ -19,8 +19,9 @@ int main(int argc, char** argv) {
     auto* freeSeats = window.findChild<QLabel*>("busFreeSeatsLabel");
     auto* occupancy = window.findChild<QProgressBar*>("busOccupancyBar");
     auto* nextStop = window.findChild<QLabel*>("busNextStopLabel");
-    CHECK(map && panel && details && passengers && freeSeats && occupancy && nextStop);
-    CHECK(details->isHidden());
+    auto* back = window.findChild<QPushButton*>("backToOverviewButton");
+    CHECK(map && panel && details && passengers && freeSeats && occupancy && nextStop && back);
+    CHECK(panel->isHidden());
 
     map->busClicked(7, "Articulado", "T1 - Troncal", 23, 160, true, "Centro");
     CHECK(panel->title() == "Bus #7");
@@ -51,10 +52,19 @@ int main(int argc, char** argv) {
     CHECK(occupancy->value() == 50);
     CHECK(nextStop->text() == "Terminal");
 
+    back->click();
+    CHECK(panel->isHidden());
+    CHECK(QMetaObject::invokeMethod(&window, "onSnapshot", Qt::DirectConnection,
+                                    Q_ARG(sit::Snapshot, snapshot)));
+    CHECK(panel->isHidden());
+
+    map->busClicked(7, "Articulado", "T1 - Troncal", 80, 160, false, "Terminal");
+    CHECK(!panel->isHidden());
+
     snapshot.vehicles.clear();
     CHECK(QMetaObject::invokeMethod(&window, "onSnapshot", Qt::DirectConnection,
                                     Q_ARG(sit::Snapshot, snapshot)));
-    CHECK(details->isHidden());
+    CHECK(panel->isHidden());
     CHECK(panel->title() == "Información del bus");
     return 0;
 }

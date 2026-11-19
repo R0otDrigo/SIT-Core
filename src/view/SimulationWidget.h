@@ -43,7 +43,7 @@ private:
     void populateRoutes(const sit::Snapshot& snapshot);
     void showBusInfo(int id, const QString& type, const QString& route,
                      int passengers, int capacity, bool dwelling, const QString& nextStop);
-    void clearBusInfo(const QString& message);
+    void clearBusInfo();
     void addLog(const QString& line);
 
     SimulationController* controller_{};
@@ -53,7 +53,7 @@ private:
     QLabel* clockLabel_{};
     QGroupBox* busInfoPanel_{};
     QWidget* busInfoDetails_{};
-    QLabel* busInfoHint_{};
+    QPushButton* backToOverviewButton_{};
     QLabel* busTypeLabel_{};
     QLabel* busRouteLabel_{};
     QLabel* busPassengersLabel_{};
