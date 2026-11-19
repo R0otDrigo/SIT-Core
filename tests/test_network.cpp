@@ -13,10 +13,12 @@ static std::unique_ptr<Network> makeNet() {
     for (auto& s : {a, b, c}) net->addStop(s);
     auto t = std::make_shared<Route>("T", "Troncal", RouteKind::Trunk, "#f00");
     t->addStop(a); t->addStop(b); t->addStop(c);
+    t->setPath({{0, 0}, {100, 0}, {200, 0}});
     auto f = std::make_shared<Route>("F", "Alim", RouteKind::Feeder, "#0f0");
     f->addStop(c); f->addStop(b);
     net->addRoute(t); net->addRoute(f);
     net->setFleetLimit(2);
+    net->calibrateGeo();
     return net;
 }
 
@@ -66,6 +68,12 @@ int main() {
 
     auto snap = net->snapshot();
     CHECK(snap.stops.size() == 3 && snap.routes.size() == 2 && snap.vehicles.size() == 2);
+    CHECK(snap.stops.front().geo.isValid());
+    CHECK(snap.routes.front().waypoints.size() == 3);
+    CHECK(snap.routes.front().path.size() == 3);
+    CHECK(snap.vehicles.front().geo.isValid());
+    CHECK(net->geoBounds().first.isValid());
+    CHECK(net->geoCenter().isValid());
 
     // Dejamos buses vacios para poder retirarlos.
     for (auto& v : net->vehicles()) v->alight(1000);

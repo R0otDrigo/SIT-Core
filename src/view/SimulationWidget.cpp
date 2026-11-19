@@ -4,24 +4,37 @@
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QQuickWidget>
+#include <QQmlContext>
+#include <QQmlError>
+#include <QStringList>
+#include <QUrl>
 #include <QVBoxLayout>
 #include <algorithm>
 #include <vector>
 #include "model/TrafficEvent.h"
 #include "model/VehicleFactory.h"
+#include "view/MapBridge.h"
 
 SimulationWidget::SimulationWidget(std::unique_ptr<sit::Network> network, QWidget* parent) : QWidget(parent) {
     controller_ = new SimulationController(std::move(network), this);
+    mapBridge_ = new MapBridge(this);
+    mapBridge_->loadGtfs();
     buildUi();
     connect(controller_, &SimulationController::snapshotReady, this, &SimulationWidget::onSnapshot);
     connect(controller_, &SimulationController::errorOccurred, this, &SimulationWidget::onError);
+    connect(mapBridge_, &MapBridge::callAnswered, this, &SimulationWidget::callAnswered);
+    connect(mapBridge_, &MapBridge::callRequested, this, &SimulationWidget::callRequested);
     controller_->start();
 }
 
 void SimulationWidget::buildUi() {
     auto* root = new QHBoxLayout(this);
-    root->setContentsMargins(0, 0, 0, 0);
-    map_ = new MapView;
+    map_ = new QQuickWidget;
+    map_->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    map_->setClearColor(QColor("#e8eef5"));
+    map_->setMinimumSize(480, 360);
+    map_->rootContext()->setContextProperty("mapBridge", mapBridge_);
     root->addWidget(map_, 1);
     connect(map_, &MapView::busClicked, this,
             [this](int id, const QString& type, const QString& route,
@@ -149,6 +162,14 @@ void SimulationWidget::buildUi() {
         controller_->triggerEvent(eventCombo_->currentData().toInt(), routeCombo_->currentData().toString());
     });
 
+    connect(map_, &QQuickWidget::statusChanged, this, [this](QQuickWidget::Status status) {
+        if (status != QQuickWidget::Error) return;
+        QStringList messages;
+        for (const QQmlError& error : map_->errors()) messages << error.toString();
+        addLog("ERROR mapa QML: " + messages.join(" | "));
+    });
+    map_->setSource(QUrl(QStringLiteral("qrc:/qml/SimulationMap.qml")));
+
     controller_->setSpeed(speedCombo_->currentData().toDouble());
 }
 
@@ -176,24 +197,7 @@ void SimulationWidget::onRouteChanged() {
 
 void SimulationWidget::onSnapshot(const sit::Snapshot& s) {
     if (!routesLoaded_) populateRoutes(s);
-    map_->refresh(s);
-    if (selectedBusId_ >= 0) {
-        const auto bus = std::find_if(s.vehicles.begin(), s.vehicles.end(),
-                                      [this](const sit::VehicleView& v) { return v.id == selectedBusId_; });
-        if (bus == s.vehicles.end()) {
-            selectedBusId_ = -1;
-            clearBusInfo(tr("El bus seleccionado fue retirado"));
-        } else {
-            QString route = QString::fromStdString(bus->routeId);
-            const auto routeInfo = std::find_if(s.routes.begin(), s.routes.end(),
-                                                [bus](const sit::RouteView& r) { return r.id == bus->routeId; });
-            if (routeInfo != s.routes.end())
-                route += QStringLiteral(" - ") + QString::fromStdString(routeInfo->name);
-            showBusInfo(bus->id, QString::fromStdString(bus->type), route,
-                        bus->passengers, bus->capacity, bus->dwelling,
-                        QString::fromStdString(bus->nextStopName));
-        }
-    }
+    mapBridge_->update(s);
 
     clockLabel_->setText(QString("Hora simulada %1%2").arg(QString::fromStdString(s.clock), s.paused ? "  (pausa)" : ""));
     busesLabel_->setText(QString("%1 / %2").arg(s.stats.activeVehicles).arg(s.stats.fleetLimit));
@@ -246,10 +250,17 @@ void SimulationWidget::clearBusInfo(const QString& message) {
 }
 
 void SimulationWidget::addLog(const QString& line) {
+    if (!logList_) return;
     logList_->insertItem(0, line);
     while (logList_->count() > 200) delete logList_->takeItem(logList_->count() - 1);
 }
 
 void SimulationWidget::onError(const QString& message) {
     addLog("ERROR: " + message);
+}
+
+void SimulationWidget::showIncomingCall(const QString& vehicleId, const QString& name,
+                                        const QString& status) {
+    mapBridge_->setIncomingCall(vehicleId, name, status);
+    addLog(QStringLiteral("Llamada entrante de %1 en vehículo %2").arg(name, vehicleId));
 }

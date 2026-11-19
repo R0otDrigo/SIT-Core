@@ -34,6 +34,16 @@ void Vehicle::assignRoute(const std::shared_ptr<Route>& route, std::size_t start
     index_ = static_cast<std::size_t>(start + dir_);
     state_ = VehicleState::Travelling;
     dwell_ = 0.0;
+    pathDistance_ = 0.0;
+    if (route->hasPath()) {
+        const double anchor = route->stopAnchor(static_cast<std::size_t>(start));
+        if (anchor >= 0.0) {
+            pathDistance_ = anchor;
+            pos_ = route->pointAtDistance(anchor);
+        } else {
+            pos_ = route->path().front();
+        }
+    }
 }
 
 std::shared_ptr<Stop> Vehicle::targetStop() const {
@@ -78,6 +88,31 @@ bool Vehicle::update(double dt, double speedFactor) {
     }
 
     state_ = VehicleState::Travelling;
+    if (r->hasPath()) {
+        const double targetDist = r->stopAnchor(index_);
+        if (targetDist >= 0.0) {
+            const double travel = speed() * dt * std::max(0.0, speedFactor);
+            double next = pathDistance_ + static_cast<double>(dir_) * travel;
+            bool arrived = false;
+            if (dir_ > 0 && pathDistance_ <= targetDist && next >= targetDist) {
+                next = targetDist;
+                arrived = true;
+            } else if (dir_ < 0 && pathDistance_ >= targetDist && next <= targetDist) {
+                next = targetDist;
+                arrived = true;
+            }
+            next = std::clamp(next, 0.0, r->pathLength());
+            pathDistance_ = next;
+            pos_ = r->pointAtDistance(next);
+            if (arrived) {
+                state_ = VehicleState::Dwelling;
+                dwell_ = 0.0;
+                return true;
+            }
+            return false;
+        }
+    }
+
     const Position target = r->stops()[index_]->position();
     moveTowards(target, dt * speedFactor);
     if (pos_ == target) {

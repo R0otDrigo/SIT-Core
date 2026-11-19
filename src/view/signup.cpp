@@ -17,9 +17,10 @@ SignUp::SignUp(FirebaseAuthManager *authManager, QWidget *parent)
 SignUp::~SignUp() { delete ui; }
 
 void SignUp::onSignUpClicked() {
-  const QString email = ui->correoElectronicoLineEdit->text().trimmed();
-  const QString password = ui->contraseALineEdit->text();
-  const QString role = ui->rolComboBox->currentText();
+  QString email = ui->correoElectronicoLineEdit->text().trimmed();
+  QString password = ui->contraseALineEdit->text();
+  QString username = ui->nombreDeUsuarioLineEdit->text();
+  QString role = ui->rolComboBox->currentText();
 
   if (email.isEmpty() || password.isEmpty()) {
     ui->info->setText(tr("Por favor, insertar correo y contraseña"));
@@ -28,7 +29,8 @@ void SignUp::onSignUpClicked() {
 
   ui->info->setText(tr("Registrando..."));
   ui->confirmButton->setEnabled(false);
-  m_authManager->signUp(email, password, role);
+  qDebug() << email << password << role << username;
+  m_authManager->signUp(email, password, role, username);
 }
 
 void SignUp::onSignUpSuccess() {

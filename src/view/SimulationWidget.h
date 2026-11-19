@@ -10,11 +10,13 @@
 #include <map>
 #include <memory>
 #include "controller/SimulationController.h"
-#include "view/MapView.h"
 
-// Vista de la simulacion: mapa + panel de control del "controlador de flota". Es un QWidget
-// hijo para poder incrustarse dentro de UserDashboard. Solo muestra datos (Snapshot) y reenvia
-// las acciones del usuario al SimulationController.
+class QQuickWidget;
+class MapBridge;
+
+// Vista de la simulacion: mapa OSM (QML) + panel de control del "controlador de flota". Es un
+// QWidget hijo para poder incrustarse dentro de UserDashboard. Solo muestra datos (Snapshot) y
+// reenvia las acciones del usuario al SimulationController.
 class SimulationWidget : public QWidget {
     Q_OBJECT
 public:
@@ -22,6 +24,14 @@ public:
 
     SimulationController* controller() const { return controller_; }
     QTableWidget* stopsTable() const { return stopsTable_; }
+    QQuickWidget* mapWidget() const { return map_; }
+
+    void showIncomingCall(const QString& vehicleId, const QString& name,
+                          const QString& status = QString());
+
+signals:
+    void callAnswered(const QString& vehicleId);
+    void callRequested(const QString& vehicleId);
 
 private slots:
     void onSnapshot(const sit::Snapshot& snapshot);
@@ -37,7 +47,8 @@ private:
     void addLog(const QString& line);
 
     SimulationController* controller_{};
-    MapView* map_{};
+    MapBridge* mapBridge_{};
+    QQuickWidget* map_{};
 
     QLabel* clockLabel_{};
     QGroupBox* busInfoPanel_{};

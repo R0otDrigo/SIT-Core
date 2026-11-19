@@ -1,5 +1,6 @@
 #include "model/NetworkBuilder.h"
 #include <set>
+#include <vector>
 #include "common/Exceptions.h"
 
 namespace sit {
@@ -19,8 +20,10 @@ std::unique_ptr<Network> NetworkBuilder::build() const {
     std::set<std::string> seen;
     for (const auto& s : data_.stops) {
         if (!seen.insert(s.id).second) throw DataLoadException("paradero repetido: " + s.id);
-        net->addStop(StopFactory::create(s.type, s.id, s.name, Position{s.x, s.y}, s.capacity));
+        net->addStop(StopFactory::create(s.type, s.id, s.name, Position{s.x, s.y}, s.capacity, s.geo));
     }
+
+    net->calibrateGeo();
 
     seen.clear();
     for (const auto& r : data_.routes) {
@@ -31,6 +34,16 @@ std::unique_ptr<Network> NetworkBuilder::build() const {
             auto stop = net->stops().byId(sid);
             if (!stop) throw InvalidRouteException(r.id + " usa un paradero inexistente: " + sid);
             route->addStop(stop);
+        }
+        if (!r.path.empty()) {
+            const bool explicitPath = r.path.front().hasLocal;
+            std::vector<Position> local;
+            local.reserve(r.path.size());
+            for (const auto& point : r.path)
+                local.push_back(point.hasLocal ? Position{point.x, point.y}
+                                               : net->positionFor(point.geo));
+            if (!route->setPath(std::move(local)) && explicitPath)
+                throw DataLoadException("PATH de " + r.id + " no esta ordenado segun sus paraderos");
         }
         net->addRoute(route);
     }

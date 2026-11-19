@@ -39,7 +39,7 @@ void FirebaseAuthManager::signIn(const QString &email, const QString &password)
 }
 
 
-void FirebaseAuthManager::signUp(const QString &email, const QString &password, const QString &role)
+void FirebaseAuthManager::signUp(const QString &email, const QString &password, const QString &role, const QString &username)
 {
     if (m_apiKey.isEmpty()) {
         emit signUpFailed("Firebase API key not configured");
@@ -47,6 +47,7 @@ void FirebaseAuthManager::signUp(const QString &email, const QString &password, 
     }
 
     m_user_role = role;
+    m_user_username = username;
 
     QUrl url = QUrl("https://identitytoolkit.googleapis.com/v1/accounts:signUp");
     QUrlQuery query;
@@ -77,9 +78,16 @@ void FirebaseAuthManager::onSignUpReplyFinished()
         return;
     }
 
-    const QJsonObject data = QJsonDocument::fromJson(reply->readAll()).object();
+    QJsonObject data = QJsonDocument::fromJson(reply->readAll()).object();
     m_idToken = data["idToken"].toString();
     m_uid = data["localId"].toString();
+
+    std::cout << "PASO POR SIGN UP RELLY" << std::endl;
+
+    qDebug() << "✅ onSignUpReplyFinished se ejecutó";  // ← si NO ves esto, es deleteLater
+    qDebug() << "Error:" << reply->error() << reply->errorString();
+    qDebug() << "Body:" << reply->readAll();
+
 
     // Ahora vamos a crear un 'documento' de firestore para almacenar los usuarios con sus respectivos roles
     createFirestoreUser();
@@ -94,15 +102,20 @@ void FirebaseAuthManager::createFirestoreUser()
                  .arg(m_projectId, m_uid));
 
     QNetworkRequest request(url);
-    request.setRawHeader("Authorization", "Bearer " + m_idToken.toUtf8());
+    request.setRawHeader("Authorization", QByteArray("Bearer ") + m_idToken.toUtf8());
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
     // El body de Firestore usa el formato "fields" con tipos explícitos
     QJsonObject roleField;
     roleField["stringValue"] = m_user_role;  // "ADMIN", "USER" o "GUEST"
 
+
+    QJsonObject usernameField;
+    usernameField["stringValue"] = m_user_username;
+
     QJsonObject fields;
     fields["role"] = roleField;
+    fields["username"] = usernameField;
 
     QJsonObject body;
     body["fields"] = fields;
@@ -160,6 +173,8 @@ void FirebaseAuthManager::onSignInReplyFinished()
                     if (role.isEmpty()) role = "user";
                     emit signInSuccess(localId, idToken, role);
                 } else {
+                    qWarning() << "No se pudo leer el rol desde Firestore:"
+                               << roleReply->errorString();
                     emit signInSuccess(localId, idToken, "user");
                 }
                 roleReply->deleteLater();

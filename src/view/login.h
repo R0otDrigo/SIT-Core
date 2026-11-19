@@ -20,7 +20,7 @@ public:
     void retranslate();
 
 signals:
-    void loginSuccessful(const QString &role);
+    void loginSuccessful(const QString &userId, const QString &idToken, const QString &role);
 
 protected:
     void changeEvent(QEvent *event) override;

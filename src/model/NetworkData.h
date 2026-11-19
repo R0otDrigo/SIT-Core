@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "common/GeoCoordinate.h"
 
 namespace sit {
 
@@ -9,11 +10,20 @@ struct StopData {
     std::string id, name, type;     // type: regular | terminal | transfer
     double x{}, y{};
     int capacity{80};
+    GeoCoordinate geo;              // opcional: si falta, Network la proyecta desde x/y
+};
+
+struct PathPointData {
+    double x{}, y{};
+    GeoCoordinate geo;
+    bool hasLocal{false};
 };
 
 struct RouteData {
     std::string id, name, kind, color;   // kind: trunk | feeder
     std::vector<std::string> stops;      // ids de paraderos en orden
+    std::vector<PathPointData> path;
+    std::string gtfsShapeId;
 };
 
 struct FleetData {

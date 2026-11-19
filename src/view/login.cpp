@@ -44,13 +44,12 @@ void Login::onSignUpClicked() {
     signUp = new SignUp(m_authManager, this);
   signUp->show();
 }
-
-void Login::onSignInSuccess(const QString &localId, const QString &idToken, const QString &role) {
-  Q_UNUSED(localId);
-  Q_UNUSED(idToken);
+void Login::onSignInSuccess(const QString &localId, const QString &idToken,
+                            const QString &role) {
   ui->loginButton->setEnabled(true);
-  ui->info->clear();
-  emit loginSuccessful(role);
+  ui->info->setText("");
+  // accept(); // What does that ... o.o
+  emit loginSuccessful(localId, idToken, role);
 }
 
 void Login::onSignInFailed(const QString &error) {

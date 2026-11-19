@@ -13,7 +13,7 @@ class FirebaseAuthManager : public QObject
 public:
     explicit FirebaseAuthManager(QObject *parent = nullptr);
 
-    void signUp(const QString &email, const QString &password, const QString &role);
+    void signUp(const QString &email, const QString &password, const QString &role, const QString &username);
     void signIn(const QString &email, const QString &password);
     void setApiKey(const QString &apiKey);
     void setProjectId(const QString &projectId);
@@ -35,6 +35,7 @@ private:
     QString m_apiKey;
     QString m_projectId;
     QString m_user_role;
+    QString m_user_username;
     QString m_idToken;
     QString m_uid;
 };

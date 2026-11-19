@@ -1,14 +1,17 @@
 #pragma once
 #include <memory>
 #include <string>
+#include "common/GeoCoordinate.h"
 #include "common/Position.h"
 
 namespace sit {
 
 class Stop {
 public:
-    Stop(std::string id, std::string name, Position pos, int maxWaiting)
-        : id_(std::move(id)), name_(std::move(name)), pos_(pos), maxWaiting_(maxWaiting) {}
+    Stop(std::string id, std::string name, Position pos, int maxWaiting,
+         GeoCoordinate geo = {})
+        : id_(std::move(id)), name_(std::move(name)), pos_(pos), maxWaiting_(maxWaiting),
+          geo_(geo) {}
     virtual ~Stop() = default;
 
     // Pasajeros nuevos por segundo (depende del tipo de paradero).
@@ -29,6 +32,9 @@ public:
     const std::string& id() const { return id_; }
     const std::string& name() const { return name_; }
     const Position& position() const { return pos_; }
+    const GeoCoordinate& geoPosition() const { return geo_; }
+    bool hasGeo() const { return geo_.isValid(); }
+    void setGeoPosition(GeoCoordinate geo) { geo_ = geo; }
 
     // Para ordenar paraderos por saturacion.
     bool operator<(const Stop& o) const { return saturation() < o.saturation(); }
@@ -38,6 +44,7 @@ private:
     std::string name_;
     Position pos_;
     int maxWaiting_;
+    GeoCoordinate geo_;
     int waiting_{0};
     double accumulator_{0.0};
 };
@@ -67,7 +74,8 @@ public:
 class StopFactory {
 public:
     static std::shared_ptr<Stop> create(const std::string& type, std::string id, std::string name,
-                                        Position pos, int maxWaiting);
+                                        Position pos, int maxWaiting,
+                                        GeoCoordinate geo = {});
 };
 
 } // namespace sit

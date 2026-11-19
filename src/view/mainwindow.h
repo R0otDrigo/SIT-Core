@@ -9,6 +9,12 @@ class Login;
 class AdminDashboard;
 class UserDashboard;
 class GuestDashboard;
+class QEvent;
+class UserBroadcast;
+class UnitRegistry;
+class CallSignaling;
+class MeetingDialog;
+struct CallInfo;
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -29,9 +35,19 @@ protected:
     void changeEvent(QEvent *event) override;
 
 private slots:
-    void onLoginSuccessful(const QString &role);
+    void onLoginSuccessful(const QString &userId, const QString &idToken, const QString &role);
+    void onIncomingCall(const CallInfo &info);
+    void onCallAnswered(const QString &vehicleId);
+    void onAdminCallRequested(const QString &vehicleId);
+    void openMeeting(const QString &peerName);
     void onLogoutRequested();
     void onLanguageSelected(const QString &locale);
+    void onMoreInfoRequested();
+    void onCallRequested();
+    void onVehicleStatusRequested();
+
+signals:
+    void onUpdateVehicle();
 
 private:
     enum Page { LoginPage, AdminPage, UserPage, GuestPage };
@@ -43,11 +59,22 @@ private:
     UserDashboard *userPage;
     GuestDashboard *guestPage;
     QTranslator *translator;
+    UserBroadcast *broadcast;
+    UnitRegistry *unitRegistry;
+    CallSignaling *callSignaling{};
+    MeetingDialog *meetingDialog{};
+    QString currentUserId;
+    QString currentVehicleId;
+    QString currentUserName;
 
-    void showPage(Page page);
+    void showPage(int index);
+    void showUserDialog(const QString &mode);
+    void setUserActionsEnabled(bool enabled);
     void applyLanguage(const QString &locale);
     void selectLanguageAction(const QString &locale);
     static QString supportedLocale(const QString &locale);
+    static bool isAdminRole(const QString &role);
+    static bool isGuestRole(const QString &role);
 };
 
 #endif

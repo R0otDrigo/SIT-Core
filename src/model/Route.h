@@ -25,6 +25,16 @@ public:
     std::size_t size() const { return stops_.size(); }
 
     double length() const;
+    std::vector<GeoCoordinate> waypoints() const;
+    bool hasGeo() const;
+    double geoLength() const;      // metros aproximados sobre el trazado geo
+
+    bool setPath(std::vector<Position> points);
+    bool hasPath() const { return path_.size() >= 2; }
+    const std::vector<Position>& path() const { return path_; }
+    double pathLength() const { return cumulative_.empty() ? 0.0 : cumulative_.back(); }
+    Position pointAtDistance(double distance) const;
+    double stopAnchor(std::size_t index) const;
 
 private:
     std::string id_;
@@ -32,6 +42,9 @@ private:
     RouteKind kind_;
     std::string color_;
     std::vector<std::shared_ptr<Stop>> stops_;
+    std::vector<Position> path_;
+    std::vector<double> cumulative_;
+    std::vector<double> stopAnchors_;
 };
 
 } // namespace sit
