@@ -16,6 +16,7 @@ class MapView : public QGraphicsView {
 public:
     explicit MapView(QWidget* parent = nullptr);
     void refresh(const sit::Snapshot& snapshot);
+    void clearSelection();
 
 signals:
     void busClicked(int id, const QString& type, const QString& route,
