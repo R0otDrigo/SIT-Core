@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/qml">
+        <file>SimulationMap.qml</file>
+        <file>RouteLayer.qml</file>
+        <file>StopMarker.qml</file>
+        <file>VehicleMarker.qml</file>
+        <file>user.qml</file>
+        <file>UserInfoDialog.qml</file>
+    </qresource>
+    <qresource prefix="/style">
+        <file alias="theme.qss">../view/theme.qss</file>
+    </qresource>
+</RCC>
