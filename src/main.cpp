@@ -16,8 +16,8 @@ int main(int argc, char *argv[]) {
     QSettings config(QCoreApplication::applicationDirPath() + "/config.ini", QSettings::IniFormat);
 
     qDebug() << QCoreApplication::applicationDirPath();
-    QString apiKey = settings.value("FIREBASE_API_KEY").toString();
-    QString projectId = settings.value("FIREBASE_PROJECT_ID").toString();
+    QString apiKey = config.value("FIREBASE_API_KEY").toString();
+    QString projectId = config.value("FIREBASE_PROJECT_ID").toString();
 
     MainWindow w;
     w.setApiConfig(apiKey, projectId);
