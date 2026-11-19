@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Registrarse</string>
+   <string>Form</string>
   </property>
   <widget class="QPushButton" name="confirmButton">
    <property name="geometry">
@@ -69,73 +69,64 @@
     </item>
     <item row="2" column="1">
      <widget class="QComboBox" name="rolComboBox">
+      <item>
        <property name="text">
-        <string>Correo Electronico</string>
+        <string>ADMIN</string>
        </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="correoElectronicoLineEdit"/>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="contraseALabel">
+      </item>
+      <item>
        <property name="text">
-        <string>Contraseña</string>
+        <string>USER</string>
        </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="contraseALineEdit">
-       <property name="echoMode">
-        <enum>QLineEdit::EchoMode::Password</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="rolLabel">
+      </item>
+      <item>
        <property name="text">
-        <string>Rol</string>
+        <string>GUESS</string>
        </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QComboBox" name="rolComboBox">
-       <item>
-        <property name="text">
-         <string>USER</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>ADMIN</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>GUEST</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-    </layout>
-   <item>
-    <widget class="QLabel" name="info">
-     <property name="text">
-      <string/>
-     </property>
-     <property name="wordWrap">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item alignment="Qt::AlignmentFlag::AlignRight">
-    <widget class="QPushButton" name="confirmButton">
-     <property name="text">
-      <string>Confirmar</string>
-     </property>
-    </widget>
-   </item>
-  </layout>
+      </item>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="nombreDeUsuarioLabel">
+      <property name="text">
+       <string>Nombre de Usuario</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QLineEdit" name="nombreDeUsuarioLineEdit"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QLabel" name="info">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>260</y>
+     <width>381</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>40</y>
+     <width>201</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>SIT-CORE | Registro</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignmentFlag::AlignCenter</set>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

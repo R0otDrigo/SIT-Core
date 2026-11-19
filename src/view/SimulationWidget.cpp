@@ -15,6 +15,7 @@
 #include "model/TrafficEvent.h"
 #include "model/VehicleFactory.h"
 #include "view/MapBridge.h"
+#include "view/MapView.h"
 
 SimulationWidget::SimulationWidget(std::unique_ptr<sit::Network> network, QWidget* parent) : QWidget(parent) {
     controller_ = new SimulationController(std::move(network), this);

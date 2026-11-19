@@ -82,8 +82,6 @@ void FirebaseAuthManager::onSignUpReplyFinished()
     m_idToken = data["idToken"].toString();
     m_uid = data["localId"].toString();
 
-    std::cout << "PASO POR SIGN UP RELLY" << std::endl;
-
     qDebug() << "✅ onSignUpReplyFinished se ejecutó";  // ← si NO ves esto, es deleteLater
     qDebug() << "Error:" << reply->error() << reply->errorString();
     qDebug() << "Body:" << reply->readAll();
@@ -108,11 +106,6 @@ void FirebaseAuthManager::createFirestoreUser()
     // El body de Firestore usa el formato "fields" con tipos explícitos
     QJsonObject roleField;
     roleField["stringValue"] = m_user_role;  // "ADMIN", "USER" o "GUEST"
-
-
-    QJsonObject usernameField;
-    usernameField["stringValue"] = m_user_username;
-
 
     QJsonObject usernameField;
     usernameField["stringValue"] = m_user_username;
