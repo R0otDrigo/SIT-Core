@@ -45,6 +45,9 @@ private slots:
     void onCallRequested();
     void onVehicleStatusRequested();
 
+signals:
+    void onUpdateVehicle();
+
 private:
     Ui::MainWindow *ui;
     QStackedWidget *stack;

@@ -1,26 +1,26 @@
 #include "mainwindow.h"
 #include "admindashboard.h"
+#include "controller/CallSignaling.h"
+#include "controller/UnitRegistry.h"
 #include "guestdashboard.h"
 #include "login.h"
 #include "ui_mainwindow.h"
 #include "userdashboard.h"
-#include "controller/CallSignaling.h"
-#include "controller/UnitRegistry.h"
 #include "view/MeetingDialog.h"
 #include "view/SimulationWidget.h"
+#include "view/UserBridge.h"
 #include "view/UserBroadcast.h"
 #include "view/UserInfoDialog.h"
-#include "view/UserBridge.h"
 #include "view/UserWidget.h"
 #include <QAbstractButton>
 #include <QAction>
 #include <QActionGroup>
 #include <QApplication>
+#include <QDebug>
 #include <QLocale>
 #include <QMessageBox>
 #include <QSettings>
 #include <QVBoxLayout>
-#include <QDebug>
 
 namespace {
 constexpr int kLoginPage = 0;
@@ -145,7 +145,8 @@ QString MainWindow::supportedLocale(const QString &locale) {
   return "es_ES";
 }
 
-void MainWindow::onLoginSuccessful(const QString &userId, const QString &idToken,
+void MainWindow::onLoginSuccessful(const QString &userId,
+                                   const QString &idToken,
                                    const QString &role) {
   // El mapa general solo se crea para administradores. Los demas roles nunca
   // reciben MapBridge: el rol "user" (o cualquier rol por defecto) ve
@@ -160,16 +161,19 @@ void MainWindow::onLoginSuccessful(const QString &userId, const QString &idToken
     callSignaling->stop();
     delete callSignaling;
   }
-  const auto signalingRole = isAdminRole(r) ? CallSignaling::Role::Admin
-                                            : CallSignaling::Role::User;
+  const auto signalingRole =
+      isAdminRole(r) ? CallSignaling::Role::Admin : CallSignaling::Role::User;
   callSignaling = new CallSignaling(signalingRole, this);
   callSignaling->start();
-  connect(callSignaling, &CallSignaling::messageReceived, this, &MainWindow::onIncomingCall);
+  connect(callSignaling, &CallSignaling::messageReceived, this,
+          &MainWindow::onIncomingCall);
 
   if (isAdminRole(r)) {
     adminPage->initialize(idToken);
-    connect(adminPage, &AdminDashboard::callAnswered, this, &MainWindow::onCallAnswered);
-    connect(adminPage, &AdminDashboard::callRequested, this, &MainWindow::onAdminCallRequested);
+    connect(adminPage, &AdminDashboard::callAnswered, this,
+            &MainWindow::onCallAnswered);
+    connect(adminPage, &AdminDashboard::callRequested, this,
+            &MainWindow::onAdminCallRequested);
     showPage(kAdminPage);
   } else if (isGuestRole(r)) {
     showPage(kGuestPage);
@@ -180,6 +184,7 @@ void MainWindow::onLoginSuccessful(const QString &userId, const QString &idToken
       connect(widget->bridge(), &UserBridge::vehicleChanged, this, [this] {
         if (UserWidget *active = userPage->userWidget())
           currentVehicleId = active->bridge()->vehicleId();
+        emit onUpdateVehicle();
       });
     }
     showPage(kUserPage);
@@ -199,31 +204,39 @@ void MainWindow::onIncomingCall(const CallInfo &info) {
   QMessageBox prompt(this);
   prompt.setIcon(QMessageBox::Information);
   prompt.setWindowTitle(tr("Llamada entrante"));
-  prompt.setText(tr("El administrador solicita una reunión con cámara y audio."));
+  prompt.setText(
+      tr("El administrador solicita una reunión con cámara y audio."));
   prompt.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
   prompt.button(QMessageBox::Yes)->setText(tr("Atender Llamada"));
   prompt.button(QMessageBox::No)->setText(tr("Rechazar"));
-  if (prompt.exec() == QMessageBox::Yes) openMeeting(tr("Administrador"));
+  if (prompt.exec() == QMessageBox::Yes)
+    openMeeting(tr("Administrador"));
 }
 
 void MainWindow::onCallAnswered(const QString &vehicleId) {
-  if (unitRegistry) unitRegistry->setStatus(vehicleId, tr("Llamada atendida"));
-  if (adminPage->simulation()) adminPage->simulation()->showIncomingCall(QString(), QString());
+  if (unitRegistry)
+    unitRegistry->setStatus(vehicleId, tr("Llamada atendida"));
+  if (adminPage->simulation())
+    adminPage->simulation()->showIncomingCall(QString(), QString());
   openMeeting(tr("Usuario"));
 }
 
 void MainWindow::onAdminCallRequested(const QString &vehicleId) {
   if (callSignaling)
-    callSignaling->sendCall(currentUserId, vehicleId, tr("Administrador"), tr("Llamada del administrador"));
-  if (unitRegistry) unitRegistry->setStatus(vehicleId, tr("Llamada del administrador"));
+    callSignaling->sendCall(currentUserId, vehicleId, tr("Administrador"),
+                            tr("Llamada del administrador"));
+  if (unitRegistry)
+    unitRegistry->setStatus(vehicleId, tr("Llamada del administrador"));
   openMeeting(tr("Usuario"));
 }
 
 void MainWindow::openMeeting(const QString &peerName) {
-  if (meetingDialog) meetingDialog->close();
+  if (meetingDialog)
+    meetingDialog->close();
   meetingDialog = new MeetingDialog(peerName, this);
   meetingDialog->setAttribute(Qt::WA_DeleteOnClose);
-  connect(meetingDialog, &QDialog::destroyed, this, [this] { meetingDialog = nullptr; });
+  connect(meetingDialog, &QDialog::destroyed, this,
+          [this] { meetingDialog = nullptr; });
   meetingDialog->show();
 }
 
@@ -267,8 +280,10 @@ void MainWindow::onMoreInfoRequested() {
 }
 
 void MainWindow::onCallRequested() {
-  if (!callSignaling || stack->currentIndex() != kUserPage) return;
-  callSignaling->sendCall(currentUserId, currentVehicleId, tr("Usuario"), tr("Llamada entrante"));
+  if (!callSignaling || stack->currentIndex() != kUserPage)
+    return;
+  callSignaling->sendCall(currentUserId, currentVehicleId, tr("Usuario"),
+                          tr("Llamada entrante"));
   if (unitRegistry && !currentVehicleId.isEmpty())
     unitRegistry->setStatus(currentVehicleId, tr("Llamada entrante"));
   openMeeting(tr("Administrador"));

@@ -3,6 +3,7 @@
 #include <QTimer>
 #include "check.h"
 #include "controller/CallSignaling.h"
+#include "controller/UnitRegistry.h"
 
 int main(int argc, char** argv) {
     QCoreApplication app(argc, argv);
@@ -34,5 +35,15 @@ int main(int argc, char** argv) {
     CHECK(got.uid == QStringLiteral("uid-1"));
     CHECK(got.vehicleId == QStringLiteral("7"));
     CHECK(got.status == QStringLiteral("Llamada entrante"));
+
+    UnitRegistry registry;
+    sit::VehicleView vehicle;
+    vehicle.id = 7;
+    vehicle.x = 12.34;
+    vehicle.y = -56.78;
+    registry.syncVehicle(vehicle, QStringLiteral("uid-1"));
+    CHECK(registry.vehicle().id == 7);
+    CHECK_NEAR(registry.vehicle().x, 12.34, 1e-9);
+    CHECK_NEAR(registry.vehicle().y, -56.78, 1e-9);
     return 0;
 }

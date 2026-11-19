@@ -95,7 +95,6 @@ private:
     QString simulationEvent_;
     UserBroadcast* broadcast_{};
     UnitRegistry* registry_{};
-    QString registeredUnitId_;
 
     VehicleListModel* vehicleModel_{};
 };

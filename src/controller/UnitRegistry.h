@@ -3,13 +3,15 @@
 #include <QNetworkAccessManager>
 #include <QString>
 #include <QVector>
+#include "model/Snapshot.h"
 
 struct UnitInfo {
     QString id;
-    qint64 x{0};
-    qint64 y{0};
+    qint64 posX{0};
+    qint64 posY{0};
     QString driverUid;
     QString status;
+    sit::VehicleView vehicle;
 };
 
 class UnitRegistry : public QObject {
@@ -19,13 +21,16 @@ public:
 
     void configure(const QString& projectId, const QString& idToken);
     void loadUnits();
+    void syncVehicle(const sit::VehicleView& vehicle, const QString& driverUid,
+                     const QString& status = QString());
     void registerUnit(const QString& unitId, const QString& driverUid,
-                      qint64 x, qint64 y, const QString& status);
+                      qint64 posX, qint64 posY, const QString& status);
     void setStatus(const QString& unitId, const QString& status);
 
     QString projectId() const { return projectId_; }
     QString idToken() const { return idToken_; }
     QVector<UnitInfo> units() const { return units_; }
+    sit::VehicleView vehicle() const { return vehicle_; }
 
 signals:
     void unitsLoaded(const QVector<UnitInfo>& units);
@@ -44,4 +49,9 @@ private:
     QString projectId_;
     QString idToken_;
     QVector<UnitInfo> units_;
+    sit::VehicleView vehicle_;
+    QString syncedUnitId_;
+    QString syncedDriver_;
+    qint64 syncedPosX_{0};
+    qint64 syncedPosY_{0};
 };
