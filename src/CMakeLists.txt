@@ -27,7 +27,7 @@ if(Qt6_FOUND AND SIT_UI_SOURCES AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
   add_executable(sit_core main.cpp)
   target_link_libraries(sit_core PRIVATE sit_ui)
   target_compile_definitions(sit_core PRIVATE SIT_DATA_DIR="${PROJECT_SOURCE_DIR}/data")
-
+endif()
 # Traducciones (opcional, requiere Qt LinguistTools): se incrustan como recurso :/i18n/...
 find_package(Qt6 QUIET COMPONENTS LinguistTools)
 if(Qt6LinguistTools_FOUND)

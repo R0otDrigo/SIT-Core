@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>Login</class>
  <widget class="QWidget" name="Login">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>378</width>
+    <height>229</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Iniciar Sesión</string>
   </property>
@@ -10,6 +18,12 @@
     <spacer name="topSpacer">
      <property name="orientation">
       <enum>Qt::Orientation::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
      </property>
     </spacer>
    </item>
@@ -121,6 +135,12 @@
     <spacer name="bottomSpacer">
      <property name="orientation">
       <enum>Qt::Orientation::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
      </property>
     </spacer>
    </item>

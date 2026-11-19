@@ -28,12 +28,6 @@ constexpr int kUserPage = 2;
 constexpr int kGuestPage = 3;
 } // namespace
 
-namespace {
-constexpr int kLoginPage = 0;
-constexpr int kAdminPage = 1;
-constexpr int kUserPage = 2;
-constexpr int kGuestPage = 3;
-} // namespace
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow),
@@ -90,9 +84,6 @@ void MainWindow::setApiConfig(const QString &api_key,
 
 MainWindow::~MainWindow() { delete ui; }
 
-void MainWindow::setApiConfig(const QString &apiKey, const QString &projectId) {
-  loginPage->setFirebaseConfig(apiKey, projectId);
-}
 
 void MainWindow::onLanguageSelected(const QString &locale) {
   applyLanguage(locale);
@@ -294,44 +285,6 @@ void MainWindow::showUserDialog(const QString &mode) {
   dialog.exec();
 }
 
-void MainWindow::setUserActionsEnabled(bool enabled) {
-  ui->actionMoreInfo->setEnabled(enabled);
-  ui->actionCall->setEnabled(enabled);
-  ui->actionVehicleStatus->setEnabled(enabled);
-}
-
-void MainWindow::onMoreInfoRequested() {
-  showUserDialog(QStringLiteral("info"));
-}
-
-void MainWindow::onCallRequested() {
-  if (!callSignaling || stack->currentIndex() != kUserPage)
-    return;
-  callSignaling->sendCall(currentUserId, currentVehicleId, tr("Usuario"),
-                          tr("Llamada entrante"));
-  if (unitRegistry && !currentVehicleId.isEmpty())
-    unitRegistry->setStatus(currentVehicleId, tr("Llamada entrante"));
-  openMeeting(tr("Administrador"));
-}
-
-void MainWindow::onVehicleStatusRequested() {
-  showUserDialog(QStringLiteral("vehicle"));
-}
-
-void MainWindow::showUserDialog(const QString &mode) {
-  UserWidget *widget = userPage->userWidget();
-  if (!widget)
-    return;
-
-  UserInfoDialog::Mode dialogMode = UserInfoDialog::Mode::MoreInfo;
-  if (mode == QStringLiteral("call"))
-    dialogMode = UserInfoDialog::Mode::Call;
-  else if (mode == QStringLiteral("vehicle"))
-    dialogMode = UserInfoDialog::Mode::VehicleStatus;
-
-  UserInfoDialog dialog(dialogMode, widget->bridge(), this);
-  dialog.exec();
-}
 
 void MainWindow::showPage(int index) { stack->setCurrentIndex(index); }
 
