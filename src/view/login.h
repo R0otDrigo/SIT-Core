@@ -25,6 +25,9 @@ signals:
 protected:
     void changeEvent(QEvent *event) override;
 
+signals:
+    void loginSuccessful(const QString &userId, const QString &idToken, const QString &role);
+
 private slots:
     void onLoginClicked();
     void onSignUpClicked();

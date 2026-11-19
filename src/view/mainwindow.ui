@@ -23,6 +23,9 @@
     <addaction name="actionIngles"/>
     <addaction name="actionChino"/>
     <addaction name="actionArabe"/>
+    <addaction name="separator"/>
+    <addaction name="separator"/>
+    <addaction name="separator"/>
    </widget>
     <widget class="QMenu" name="menuLogout">
      <property name="title">

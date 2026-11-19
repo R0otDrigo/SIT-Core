@@ -6,18 +6,70 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>380</width>
-    <height>220</height>
+    <width>400</width>
+    <height>387</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Registrarse</string>
   </property>
-  <layout class="QVBoxLayout" name="rootLayout">
-   <item>
-    <layout class="QFormLayout" name="formLayout">
-     <item row="0" column="0">
-      <widget class="QLabel" name="correoElectronicoLabel">
+  <widget class="QPushButton" name="confirmButton">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>340</y>
+     <width>101</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Confirmar</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="formLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>100</y>
+     <width>381</width>
+     <height>141</height>
+    </rect>
+   </property>
+   <layout class="QFormLayout" name="formLayout">
+    <item row="0" column="0">
+     <widget class="QLabel" name="correoElectronicoLabel">
+      <property name="text">
+       <string>Correo Electronico</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLineEdit" name="correoElectronicoLineEdit"/>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="contraseALabel">
+      <property name="text">
+       <string>Contraseña</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLineEdit" name="contraseALineEdit">
+      <property name="echoMode">
+       <enum>QLineEdit::EchoMode::Password</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="rolLabel">
+      <property name="text">
+       <string>Rol</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QComboBox" name="rolComboBox">
+      <item>
        <property name="text">
         <string>Correo Electronico</string>
        </property>

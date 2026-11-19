@@ -113,6 +113,10 @@ void FirebaseAuthManager::createFirestoreUser()
     QJsonObject usernameField;
     usernameField["stringValue"] = m_user_username;
 
+
+    QJsonObject usernameField;
+    usernameField["stringValue"] = m_user_username;
+
     QJsonObject fields;
     fields["role"] = roleField;
     fields["username"] = usernameField;

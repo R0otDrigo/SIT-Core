@@ -19,7 +19,22 @@ UserDashboard::UserDashboard(QWidget *parent) : Dashboard(parent) {
     retranslate();
 }
 
-UserDashboard::~UserDashboard() = default;
+void UserDashboard::setBroadcast(UserBroadcast *broadcast)
+{
+    broadcast_ = broadcast;
+    if (userWidget_) userWidget_->setBroadcast(broadcast_);
+}
+
+void UserDashboard::setUnitRegistry(UnitRegistry *registry)
+{
+    unitRegistry_ = registry;
+}
+
+void UserDashboard::resetSession()
+{
+    delete userWidget_;
+    userWidget_ = nullptr;
+}
 
 void UserDashboard::initializeSession(const QString &userId, const QString &idToken)
 {
