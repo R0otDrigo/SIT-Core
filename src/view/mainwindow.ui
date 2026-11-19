@@ -1,127 +1,140 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SignUp</class>
- <widget class="QWidget" name="SignUp">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="windowModality">
+   <enum>Qt::WindowModality::NonModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>420</height>
+    <width>700</width>
+    <height>714</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Registrarse</string>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Ignored" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
-  
-  <!-- Botón Confirmar -->
-  <widget class="QPushButton" name="confirmButton">
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
-     <x>150</x>
-     <y>370</y>
-     <width>101</width>
-     <height>27</height>
+     <x>0</x>
+     <y>0</y>
+     <width>700</width>
+     <height>24</height>
     </rect>
+   </property>
+   <widget class="QMenu" name="menuLanguage">
+    <property name="focusPolicy">
+     <enum>Qt::FocusPolicy::ClickFocus</enum>
+    </property>
+    <property name="title">
+     <string>Language</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="actionEspa_ol"/>
+    <addaction name="actionIngles"/>
+    <addaction name="actionChino"/>
+    <addaction name="actionArabe"/>
+    <addaction name="separator"/>
+    <addaction name="separator"/>
+    <addaction name="separator"/>
+   </widget>
+    <widget class="QMenu" name="menuLogout">
+     <property name="title">
+      <string>User</string>
+     </property>
+     <addaction name="actionMoreInfo"/>
+     <addaction name="actionCall"/>
+     <addaction name="actionVehicleStatus"/>
+     <addaction name="separator"/>
+     <addaction name="actionLogout"/>
+    </widget>
+   <addaction name="menuLanguage"/>
+   <addaction name="menuLogout"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionEspa_ol">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
    </property>
    <property name="text">
-    <string>Confirmar</string>
+    <string>Español</string>
    </property>
-  </widget>
-
-  <!-- Contenedor del Formulario -->
-  <widget class="QWidget" name="formLayoutWidget">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>20</y>
-     <width>380</width>
-     <height>340</height>
-    </rect>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::TextHeuristicRole</enum>
    </property>
-   <layout class="QFormLayout" name="formLayout">
-    
-    <!-- Nuevo campo: Username -->
-    <item row="0" column="0">
-     <widget class="QLabel" name="usernameLabel">
-      <property name="text">
-       <string>Nombre de Usuario</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QLineEdit" name="usernameLineEdit"/>
-    </item>
-
-    <!-- Correo Electrónico -->
-    <item row="1" column="0">
-     <widget class="QLabel" name="correoElectronicoLabel">
-      <property name="text">
-       <string>Correo Electrónico</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QLineEdit" name="correoElectronicoLineEdit"/>
-    </item>
-
-    <!-- Contraseña -->
-    <item row="2" column="0">
-     <widget class="QLabel" name="contraseALabel">
-      <property name="text">
-       <string>Contraseña</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="1">
-     <widget class="QLineEdit" name="contraseALineEdit">
-      <property name="echoMode">
-       <enum>QLineEdit::Password</enum>
-      </property>
-     </widget>
-    </item>
-
-    <!-- Rol -->
-    <item row="3" column="0">
-     <widget class="QLabel" name="rolLabel">
-      <property name="text">
-       <string>Rol</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="1">
-     <widget class="QComboBox" name="rolComboBox">
-      <item>
-       <property name="text">
-        <string>USER</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>ADMIN</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>GUEST</string>
-       </property>
-      </item>
-     </widget>
-    </item>
-
-    <!-- Etiqueta de Información -->
-    <item row="4" column="0" colspan="2">
-     <widget class="QLabel" name="info">
-      <property name="text">
-       <string/>
-      </property>
-      <property name="wordWrap">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
+  </action>
+  <action name="actionIngles">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Ingles</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::TextHeuristicRole</enum>
+   </property>
+  </action>
+  <action name="actionChino">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Chino</string>
+   </property>
+  </action>
+  <action name="actionArabe">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Arabe</string>
+   </property>
+  </action>
+  <action name="actionMoreInfo">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Más información</string>
+   </property>
+  </action>
+  <action name="actionCall">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Llamar</string>
+   </property>
+  </action>
+  <action name="actionVehicleStatus">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Vehicle status</string>
+   </property>
+  </action>
+  <action name="actionLogout">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::EditClear"/>
+   </property>
+   <property name="text">
+    <string>Logout</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
