@@ -11,6 +11,10 @@ class UserDashboard;
 class GuestDashboard;
 class QEvent;
 class UserBroadcast;
+class UnitRegistry;
+class CallSignaling;
+class MeetingDialog;
+struct CallInfo;
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -30,7 +34,11 @@ protected:
     void changeEvent(QEvent *event) override;
 
 private slots:
-    void onLoginSuccessful(const QString &userId, const QString &role);
+    void onLoginSuccessful(const QString &userId, const QString &idToken, const QString &role);
+    void onIncomingCall(const CallInfo &info);
+    void onCallAnswered(const QString &vehicleId);
+    void onAdminCallRequested(const QString &vehicleId);
+    void openMeeting(const QString &peerName);
     void onLogoutRequested();
     void onLanguageSelected(const QString &locale);
     void onMoreInfoRequested();
@@ -46,6 +54,12 @@ private:
     GuestDashboard *guestPage;
     QTranslator *translator;
     UserBroadcast *broadcast;
+    UnitRegistry *unitRegistry;
+    CallSignaling *callSignaling{};
+    MeetingDialog *meetingDialog{};
+    QString currentUserId;
+    QString currentVehicleId;
+    QString currentUserName;
 
     void showPage(int index);
     void showUserDialog(const QString &mode);

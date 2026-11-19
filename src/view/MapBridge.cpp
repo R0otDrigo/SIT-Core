@@ -71,6 +71,7 @@ void MapBridge::loadGtfs(const QString& dataDir) {
 }
 
 void MapBridge::update(const sit::Snapshot& snapshot) {
+    lastSnapshot_ = snapshot;
     if (!routesInitialized_ && !snapshot.routes.empty()) {
         routeModel_->resetFrom(snapshot.routes);
         routesInitialized_ = true;
@@ -132,4 +133,65 @@ void MapBridge::updateViewFrom(const sit::Snapshot& snapshot) {
         initialZoom_ = std::clamp(13.5 - std::log2(span / 0.05), 10.5, 15.0);
 
     emit viewChanged();
+}
+
+void MapBridge::selectVehicle(const QString& vehicleId) {
+    if (vehicleId.isEmpty()) {
+        clearSelection();
+        return;
+    }
+
+    const sit::VehicleView* vehicle = nullptr;
+    for (const auto& item : lastSnapshot_.vehicles) {
+        if (QString::number(item.id) == vehicleId) {
+            vehicle = &item;
+            break;
+        }
+    }
+    if (!vehicle) {
+        clearSelection();
+        return;
+    }
+
+    QString routeLabel = QString::fromStdString(vehicle->routeId);
+    for (const auto& route : lastSnapshot_.routes) {
+        if (route.id == vehicle->routeId) {
+            routeLabel = QString::fromStdString(route.name);
+            break;
+        }
+    }
+
+    selectedVehicleId_ = vehicleId;
+    selectedVehicleStats_ = QStringLiteral("Vehículo %1 | Ruta: %2 | Pasajeros: %3/%4 | %5")
+                                .arg(vehicleId, routeLabel)
+                                .arg(vehicle->passengers)
+                                .arg(vehicle->capacity)
+                                .arg(vehicle->dwelling ? QStringLiteral("en paradero")
+                                                       : QStringLiteral("en ruta"));
+    emit selectionChanged();
+}
+
+void MapBridge::clearSelection() {
+    if (selectedVehicleId_.isEmpty() && selectedVehicleStats_.isEmpty()) return;
+    selectedVehicleId_.clear();
+    selectedVehicleStats_.clear();
+    emit selectionChanged();
+}
+
+void MapBridge::setIncomingCall(const QString& vehicleId, const QString& name,
+                                const QString& status) {
+    incomingCallVehicleId_ = vehicleId;
+    incomingCallName_ = name;
+    incomingCallStatus_ = status;
+    emit callChanged();
+}
+
+void MapBridge::clearIncomingCall() {
+    if (incomingCallVehicleId_.isEmpty() && incomingCallName_.isEmpty() &&
+        incomingCallStatus_.isEmpty())
+        return;
+    incomingCallVehicleId_.clear();
+    incomingCallName_.clear();
+    incomingCallStatus_.clear();
+    emit callChanged();
 }

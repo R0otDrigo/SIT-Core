@@ -6,5 +6,6 @@
         <file>VehicleMarker.qml</file>
         <file>user.qml</file>
         <file>UserInfoDialog.qml</file>
+        <file>meeting.qml</file>
     </qresource>
 </RCC>

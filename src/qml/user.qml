@@ -21,7 +21,7 @@ Item {
         anchors.fill: parent
         plugin: osmPlugin
         center: QtPositioning.coordinate(userBridge.centerLatitude, userBridge.centerLongitude)
-        zoomLevel: userBridge.initialZoom
+        zoomLevel: 36
         minimumZoomLevel: 9
         maximumZoomLevel: 18
         color: "#e8eef5"

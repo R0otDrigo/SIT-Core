@@ -11,6 +11,7 @@
 
 #include "common/Exceptions.h"
 #include "controller/SimulationController.h"
+#include "controller/UnitRegistry.h"
 #include "view/SimulationWidget.h"
 #include "view/UserBroadcast.h"
 
@@ -57,6 +58,11 @@ void AdminDashboard::setBroadcast(UserBroadcast *broadcast)
     if (messagesBox_) messagesBox_->setEnabled(broadcast_ != nullptr);
 }
 
+void AdminDashboard::setUnitRegistry(UnitRegistry *registry)
+{
+    unitRegistry_ = registry;
+}
+
 void AdminDashboard::sendMessages(const QString &antecedentes, const QString &evento)
 {
     if (!broadcast_) return;
@@ -64,10 +70,29 @@ void AdminDashboard::sendMessages(const QString &antecedentes, const QString &ev
     if (eventoEdit_) eventoEdit_->setText(evento);
     broadcast_->setAntecedentes(antecedentes);
     broadcast_->setEvento(evento);
+
+    if (unitRegistry_) {
+        const QVector<UnitInfo> units = unitRegistry_->units();
+        for (const UnitInfo &unit : units)
+            unitRegistry_->setStatus(unit.id, evento);
+    }
 }
 
-void AdminDashboard::initialize()
+void AdminDashboard::showIncomingCall(const QString &vehicleId, const QString &name,
+                                      const QString &status)
 {
+    if (!simulation_) return;
+    simulation_->showIncomingCall(vehicleId, name, status);
+    if (unitRegistry_) unitRegistry_->setStatus(vehicleId, QStringLiteral("Llamada entrante: %1").arg(name));
+}
+
+void AdminDashboard::initialize(const QString &idToken)
+{
+    idToken_ = idToken;
+    if (unitRegistry_) {
+        unitRegistry_->configure(unitRegistry_->projectId(), idToken_);
+        unitRegistry_->loadUnits();
+    }
     if (simulation_) return;
     auto *layout = qobject_cast<QVBoxLayout *>(this->layout());
     if (!layout) return;

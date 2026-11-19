@@ -66,12 +66,10 @@ void Login::onSignUpClicked() {
 }
 void Login::onSignInSuccess(const QString &localId, const QString &idToken,
                             const QString &role) {
-  Q_UNUSED(localId);
-  Q_UNUSED(idToken);
   ui->loginButton->setEnabled(true);
   ui->info->setText("");
   // accept(); // What does that ... o.o
-  emit loginSuccessful(localId, role);
+  emit loginSuccessful(localId, idToken, role);
 }
 
 void Login::onSignInFailed(const QString &error) {

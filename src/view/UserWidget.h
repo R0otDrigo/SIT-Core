@@ -8,6 +8,7 @@ class QLabel;
 class QQuickWidget;
 class UserBridge;
 class UserBroadcast;
+class UnitRegistry;
 
 // Vista de solo lectura para el rol "user": carga user.qml con un contexto propio y nunca
 // expone el MapBridge ni los controles del simulador (eso es exclusivo del administrador).
@@ -18,6 +19,7 @@ public:
                         QWidget* parent = nullptr);
 
     void setBroadcast(UserBroadcast* broadcast);
+    void setUnitRegistry(UnitRegistry* registry);
 
     SimulationController* controller() const { return controller_; }
     UserBridge* bridge() const { return bridge_; }

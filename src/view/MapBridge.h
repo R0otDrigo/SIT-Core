@@ -28,6 +28,11 @@ class MapBridge : public QObject {
     Q_PROPERTY(QString eventText READ eventText NOTIFY eventTextChanged)
     Q_PROPERTY(bool showGtfs READ showGtfs WRITE setShowGtfs NOTIFY showGtfsChanged)
     Q_PROPERTY(QString gtfsStatus READ gtfsStatus NOTIFY gtfsStatusChanged)
+    Q_PROPERTY(QString selectedVehicleId READ selectedVehicleId NOTIFY selectionChanged)
+    Q_PROPERTY(QString selectedVehicleStats READ selectedVehicleStats NOTIFY selectionChanged)
+    Q_PROPERTY(QString incomingCallVehicleId READ incomingCallVehicleId NOTIFY callChanged)
+    Q_PROPERTY(QString incomingCallName READ incomingCallName NOTIFY callChanged)
+    Q_PROPERTY(QString incomingCallStatus READ incomingCallStatus NOTIFY callChanged)
 
 public:
     explicit MapBridge(QObject* parent = nullptr);
@@ -51,15 +56,28 @@ public:
     QString eventText() const { return eventText_; }
     bool showGtfs() const { return showGtfs_; }
     QString gtfsStatus() const { return gtfsStatus_; }
+    QString selectedVehicleId() const { return selectedVehicleId_; }
+    QString selectedVehicleStats() const { return selectedVehicleStats_; }
+    QString incomingCallVehicleId() const { return incomingCallVehicleId_; }
+    QString incomingCallName() const { return incomingCallName_; }
+    QString incomingCallStatus() const { return incomingCallStatus_; }
 
 public slots:
     void setShowGtfs(bool show);
+    void selectVehicle(const QString& vehicleId);
+    void clearSelection();
+    void setIncomingCall(const QString& vehicleId, const QString& name, const QString& status);
+    void clearIncomingCall();
 
 signals:
     void viewChanged();
     void eventTextChanged();
     void showGtfsChanged();
     void gtfsStatusChanged();
+    void selectionChanged();
+    void callChanged();
+    void callAnswered(QString vehicleId);
+    void callRequested(QString vehicleId);
 
 private:
     void updateViewFrom(const sit::Snapshot& snapshot);
@@ -80,4 +98,10 @@ private:
     QString eventText_;
     bool showGtfs_{true};
     QString gtfsStatus_;
+    sit::Snapshot lastSnapshot_;
+    QString selectedVehicleId_;
+    QString selectedVehicleStats_;
+    QString incomingCallVehicleId_;
+    QString incomingCallName_;
+    QString incomingCallStatus_;
 };

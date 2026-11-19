@@ -7,6 +7,7 @@ class QGroupBox;
 class QLineEdit;
 class SimulationWidget;
 class UserBroadcast;
+class UnitRegistry;
 
 class AdminDashboard : public Dashboard
 {
@@ -16,12 +17,19 @@ public:
     ~AdminDashboard() override;
 
     // El mapa general se crea solo cuando inicia sesion un administrador.
-    void initialize();
+    void initialize(const QString &idToken = QString());
     void resetSession();
     void setBroadcast(UserBroadcast *broadcast);
+    void setUnitRegistry(UnitRegistry *registry);
     void sendMessages(const QString &antecedentes, const QString &evento);
+    void showIncomingCall(const QString &vehicleId, const QString &name,
+                          const QString &status = QString());
 
     SimulationWidget *simulation() const { return simulation_; }
+
+signals:
+    void callAnswered(const QString &vehicleId);
+    void callRequested(const QString &vehicleId);
 
 protected:
     QString dashboardTitle() const override;
@@ -33,6 +41,8 @@ private:
     QGroupBox *messagesBox_ = nullptr;
     QLineEdit *antecedentesEdit_ = nullptr;
     QLineEdit *eventoEdit_ = nullptr;
+    UnitRegistry *unitRegistry_ = nullptr;
+    QString idToken_;
 };
 
 #endif // ADMINDASHBOARD_H

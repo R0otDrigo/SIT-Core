@@ -109,6 +109,14 @@ Item {
                 routeId: model.routeId
                 busType: model.type
                 dwelling: model.dwelling
+                showStats: mapBridge.selectedVehicleId === String(model.vehicleId)
+                statsText: mapBridge.selectedVehicleStats
+                incomingCall: mapBridge.incomingCallVehicleId === String(model.vehicleId)
+                callName: mapBridge.incomingCallName
+                callStatus: mapBridge.incomingCallStatus
+                onClicked: mapBridge.selectVehicle(String(model.vehicleId))
+                onCallRequested: mapBridge.callRequested(String(model.vehicleId))
+                onCallAnswered: mapBridge.callAnswered(String(model.vehicleId))
             }
         }
     }

@@ -7,6 +7,7 @@
 
 #include "common/Exceptions.h"
 #include "controller/SimulationController.h"
+#include "controller/UnitRegistry.h"
 #include "view/UserBroadcast.h"
 #include "view/UserWidget.h"
 
@@ -22,8 +23,10 @@ UserDashboard::UserDashboard(QWidget *parent)
 
 UserDashboard::~UserDashboard() = default;
 
-void UserDashboard::initializeSession(const QString &userId)
+void UserDashboard::initializeSession(const QString &userId, const QString &idToken)
 {
+    if (unitRegistry_ && !idToken.isEmpty())
+        unitRegistry_->configure(unitRegistry_->projectId(), idToken);
     if (userWidget_) return;
     auto *layout = qobject_cast<QVBoxLayout *>(this->layout());
     if (!layout) return;
@@ -34,6 +37,7 @@ void UserDashboard::initializeSession(const QString &userId)
     try {
         userWidget_ = new UserWidget(SimulationController::loadNetwork(path), userId, this);
         userWidget_->setBroadcast(broadcast_);
+        userWidget_->setUnitRegistry(unitRegistry_);
         layout->addWidget(userWidget_, 1);
     } catch (const sit::SitException &e) {
         auto *error = new QLabel(tr("No se pudo cargar la red:\n%1").arg(e.what()), this);
@@ -46,6 +50,11 @@ void UserDashboard::setBroadcast(UserBroadcast *broadcast)
 {
     broadcast_ = broadcast;
     if (userWidget_) userWidget_->setBroadcast(broadcast_);
+}
+
+void UserDashboard::setUnitRegistry(UnitRegistry *registry)
+{
+    unitRegistry_ = registry;
 }
 
 void UserDashboard::resetSession()

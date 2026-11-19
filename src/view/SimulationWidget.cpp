@@ -22,6 +22,8 @@ SimulationWidget::SimulationWidget(std::unique_ptr<sit::Network> network, QWidge
     buildUi();
     connect(controller_, &SimulationController::snapshotReady, this, &SimulationWidget::onSnapshot);
     connect(controller_, &SimulationController::errorOccurred, this, &SimulationWidget::onError);
+    connect(mapBridge_, &MapBridge::callAnswered, this, &SimulationWidget::callAnswered);
+    connect(mapBridge_, &MapBridge::callRequested, this, &SimulationWidget::callRequested);
     controller_->start();
 }
 
@@ -211,4 +213,10 @@ void SimulationWidget::addLog(const QString& line) {
 
 void SimulationWidget::onError(const QString& message) {
     addLog("ERROR: " + message);
+}
+
+void SimulationWidget::showIncomingCall(const QString& vehicleId, const QString& name,
+                                        const QString& status) {
+    mapBridge_->setIncomingCall(vehicleId, name, status);
+    addLog(QStringLiteral("Llamada entrante de %1 en vehículo %2").arg(name, vehicleId));
 }

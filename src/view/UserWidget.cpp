@@ -27,6 +27,11 @@ void UserWidget::setBroadcast(UserBroadcast* broadcast)
     bridge_->setBroadcast(broadcast);
 }
 
+void UserWidget::setUnitRegistry(UnitRegistry* registry)
+{
+    bridge_->setUnitRegistry(registry);
+}
+
 void UserWidget::buildUi()
 {
     setWindowTitle(tr("Mi espacio de usuario"));

@@ -2,6 +2,8 @@
 #include <QHash>
 #include <QStringList>
 #include <algorithm>
+#include <cmath>
+#include "controller/UnitRegistry.h"
 #include "view/MapModels.h"
 #include "view/UserBroadcast.h"
 
@@ -50,12 +52,18 @@ void UserBridge::setBroadcast(UserBroadcast* broadcast)
     emit broadcastChanged();
 }
 
+void UserBridge::setUnitRegistry(UnitRegistry* registry)
+{
+    registry_ = registry;
+}
+
 void UserBridge::setUser(const QString& userId)
 {
     if (userId_ == userId) return;
     userId_ = userId;
     displayName_ = userId.isEmpty() ? tr("Usuario") : tr("Usuario %1").arg(userId.left(6));
     assignedId_ = -1;
+    registeredUnitId_.clear();
     lastGeo_ = {};
     kilometers_ = 0.0;
     emit userChanged();
@@ -64,6 +72,7 @@ void UserBridge::setUser(const QString& userId)
 
 void UserBridge::clearVehicle()
 {
+    registeredUnitId_.clear();
     routeId_.clear();
     routeLabel_.clear();
     vehicleType_.clear();
@@ -152,5 +161,15 @@ void UserBridge::update(const sit::Snapshot& snapshot)
     }
 
     vehicleModel_->sync({*assigned}, routeColors);
+
+    const QString unitId = QString::number(assignedId_);
+    if (registry_ && registeredUnitId_ != unitId) {
+        registry_->registerUnit(unitId, userId_,
+                                std::llround(latitude_ * 1000.0),
+                                std::llround(longitude_ * 1000.0),
+                                QString());
+        registeredUnitId_ = unitId;
+    }
+
     emit vehicleChanged();
 }

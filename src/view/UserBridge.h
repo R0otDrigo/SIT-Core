@@ -5,6 +5,7 @@
 #include "model/Snapshot.h"
 
 class UserBroadcast;
+class UnitRegistry;
 class VehicleListModel;
 
 // Puente exclusivo de la vista de usuario: expone unicamente el bus asignado a ese uid.
@@ -40,6 +41,7 @@ public:
 
     void setUser(const QString& userId);
     void setBroadcast(UserBroadcast* broadcast);
+    void setUnitRegistry(UnitRegistry* registry);
     void update(const sit::Snapshot& snapshot);
 
     QString userId() const { return userId_; }
@@ -92,6 +94,8 @@ private:
     QString info_;
     QString simulationEvent_;
     UserBroadcast* broadcast_{};
+    UnitRegistry* registry_{};
+    QString registeredUnitId_;
 
     VehicleListModel* vehicleModel_{};
 };

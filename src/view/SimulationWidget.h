@@ -25,6 +25,13 @@ public:
     QTableWidget* stopsTable() const { return stopsTable_; }
     QQuickWidget* mapWidget() const { return map_; }
 
+    void showIncomingCall(const QString& vehicleId, const QString& name,
+                          const QString& status = QString());
+
+signals:
+    void callAnswered(const QString& vehicleId);
+    void callRequested(const QString& vehicleId);
+
 private slots:
     void onSnapshot(const sit::Snapshot& snapshot);
     void onError(const QString& message);
