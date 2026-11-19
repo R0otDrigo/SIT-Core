@@ -29,6 +29,28 @@ Item {
         color: "#e8eef5"
         copyrightsVisible: true
 
+        DragHandler {
+            target: null
+            onTranslationChanged: (delta) => map.pan(-delta.x, -delta.y)
+        }
+
+        WheelHandler {
+            // Accepts both mouse wheel and touchpad gestures
+            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+
+            onWheel: (event) => {
+                // event.angleDelta.y > 0 means scroll up/forward
+                // event.angleDelta.y < 0 means scroll down/backward
+                console.log("Vertical delta:", event.angleDelta.y)
+                if (event.angleDelta.y > 0)
+                  map.zoomLevel = Math.min(map.maximumZoomLevel, map.zoomLevel + 1)
+                else
+                  map.zoomLevel = Math.max(map.minimumZoomLevel, map.zoomLevel - 1)
+                // Prevent the event from propagating to items below
+                event.accepted = true
+            }
+        }
+
         function selectCustomMapType() {
             for (let i = 0; i < supportedMapTypes.length; ++i) {
                 if (supportedMapTypes[i].style === MapType.CustomMap) {
