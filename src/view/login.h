@@ -34,6 +34,8 @@ private slots:
   void onSignInFailed(const QString &error);
 
 private:
+  void setInfo(const QString &text, bool error);
+
   Ui::Login *ui;
   SignUp *signUp = nullptr;
   FirebaseAuthManager *m_authManager;

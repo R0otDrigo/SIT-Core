@@ -16,6 +16,7 @@ public:
     ~SignUp() override;
 
     void retranslate();
+    void reset();
 
 protected:
     void changeEvent(QEvent *event) override;
@@ -26,6 +27,8 @@ private slots:
     void onSignUpFailed(const QString &error);
 
 private:
+    void setInfo(const QString &text, bool error);
+
     Ui::SignUp *ui;
     FirebaseAuthManager *m_authManager;
 };
