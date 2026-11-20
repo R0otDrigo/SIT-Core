@@ -4,7 +4,9 @@
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
+#include <QHash>
 #include <QHeaderView>
+#include <QPixmap>
 #include <QQuickWidget>
 #include <QQmlContext>
 #include <QQmlError>
@@ -13,6 +15,7 @@
 #include <QUrl>
 #include <QVBoxLayout>
 #include <algorithm>
+#include <unordered_map>
 #include <vector>
 #include "model/TrafficEvent.h"
 #include "model/VehicleFactory.h"
@@ -120,6 +123,31 @@ void SimulationWidget::buildUi() {
     clockCol->addLayout(playRow);
     col->addWidget(clockCard);
 
+    // --- Rutas: buscar, elegir y ver cual necesita buses ---
+    auto* routesBox = new QGroupBox(tr("Rutas"));
+    auto* routesCol = new QVBoxLayout(routesBox);
+    routeSearch_ = new QLineEdit;
+    routeSearch_->setObjectName("routeSearch");
+    routeSearch_->setPlaceholderText(tr("Buscar por nombre o código"));
+    routeSearch_->setClearButtonEnabled(true);
+    routeList_ = new QListWidget;
+    routeList_->setObjectName("routeList");
+    routeList_->setMinimumHeight(200);
+    routeList_->setToolTip(tr("Ordenadas por pasajeros esperando por bus: arriba las que necesitan más buses"));
+    auto* routesHint = new QLabel(tr("Arriba, las rutas con más gente esperando por bus."));
+    routesHint->setProperty("role", "muted");
+    routesHint->setWordWrap(true);
+    auto* showAllBtn = new QPushButton(tr("Ver todas las rutas"));
+    showAllBtn->setProperty("variant", "ghost");
+    gtfsCheck_ = new QCheckBox(tr("Mostrar trazados GTFS de fondo"));
+    gtfsCheck_->setToolTip(tr("Dibuja las 227 rutas reales de Arequipa como referencia"));
+    routesCol->addWidget(routeSearch_);
+    routesCol->addWidget(routeList_);
+    routesCol->addWidget(routesHint);
+    routesCol->addWidget(showAllBtn);
+    routesCol->addWidget(gtfsCheck_);
+    col->addWidget(routesBox);
+
     // --- Bus seleccionado (solo visible al hacer clic en un bus del mapa) ---
     col->addWidget(busInfoPanel_);
 
@@ -127,7 +155,7 @@ void SimulationWidget::buildUi() {
     auto* fleetBox = new QGroupBox(tr("Flota"));
     auto* fleet = new QFormLayout(fleetBox);
     routeCombo_ = new QComboBox;
-    routeCombo_->setToolTip(tr("Ruta sobre la que actúan la flota y los eventos de tráfico"));
+    routeCombo_->setToolTip(tr("Ruta sobre la que actúan la flota y los eventos de tráfico; se elige también desde la lista de rutas"));
     vehicleTypeCombo_ = new QComboBox;
     vehicleTypeCombo_->setToolTip(tr("Solo se listan los tipos de bus compatibles con la ruta"));
     auto* dispatchBtn = new QPushButton(tr("Despachar bus"));
@@ -177,8 +205,8 @@ void SimulationWidget::buildUi() {
     col->addWidget(kpiBox);
 
     // --- Paraderos ---
-    auto* stopsBox = new QGroupBox(tr("Paraderos (más saturados primero)"));
-    auto* stopsCol = new QVBoxLayout(stopsBox);
+    stopsBox_ = new QGroupBox(tr("Paraderos (más saturados primero)"));
+    auto* stopsCol = new QVBoxLayout(stopsBox_);
     stopsTable_ = new QTableWidget(0, 3);
     stopsTable_->setHorizontalHeaderLabels({tr("Paradero"), tr("Esperan"), tr("Saturación")});
     stopsTable_->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
@@ -187,7 +215,7 @@ void SimulationWidget::buildUi() {
     stopsTable_->setSelectionMode(QAbstractItemView::NoSelection);
     stopsTable_->setMinimumHeight(220);
     stopsCol->addWidget(stopsTable_);
-    col->addWidget(stopsBox);
+    col->addWidget(stopsBox_);
 
     // --- Registro ---
     auto* logBox = new QGroupBox(tr("Registro"));
@@ -215,6 +243,18 @@ void SimulationWidget::buildUi() {
     connect(speedCombo_, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
             [this](int) { controller_->setSpeed(speedCombo_->currentData().toDouble()); });
     connect(routeCombo_, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int) { onRouteChanged(); });
+    // Solo las acciones del usuario cambian el foco (al cargar, el combo toma la primera ruta).
+    connect(routeCombo_, QOverload<int>::of(&QComboBox::activated), this,
+            [this](int) { focusRoute(routeCombo_->currentData().toString()); });
+    connect(routeList_, &QListWidget::itemClicked, this,
+            [this](QListWidgetItem* item) { focusRoute(item->data(Qt::UserRole).toString()); });
+    connect(routeSearch_, &QLineEdit::textChanged, this, &SimulationWidget::filterRoutes);
+    connect(showAllBtn, &QPushButton::clicked, this, [this] { focusRoute(QString()); });
+    connect(gtfsCheck_, &QCheckBox::toggled, mapBridge_, &MapBridge::setShowGtfs);
+    // El chip del mapa tambien puede quitar el foco.
+    connect(mapBridge_, &MapBridge::focusChanged, this, [this] {
+        if (mapBridge_->focusedRouteId().isEmpty()) routeList_->clearSelection();
+    });
     connect(dispatchBtn, &QPushButton::clicked, this, [this] {
         controller_->dispatchBus(routeCombo_->currentData().toString(), vehicleTypeCombo_->currentData().toInt());
     });
@@ -239,8 +279,76 @@ void SimulationWidget::populateRoutes(const sit::Snapshot& snap) {
         const QString id = QString::fromStdString(r.id);
         routeIsTrunk_[id] = r.trunk;
         routeCombo_->addItem(QString("%1 - %2").arg(id, QString::fromStdString(r.name)), id);
+        QPixmap swatch(14, 14);
+        swatch.fill(QColor(QString::fromStdString(r.color)));
+        auto* item = new QListWidgetItem(QIcon(swatch), QString::fromStdString(r.name), routeList_);
+        item->setData(Qt::UserRole, id);
+        item->setData(Qt::UserRole + 1, QString::fromStdString(r.name));
     }
     routesLoaded_ = true;
+}
+
+void SimulationWidget::focusRoute(const QString& routeId) {
+    mapBridge_->setFocusedRouteId(routeId);
+    if (routeId.isEmpty()) {
+        routeList_->clearSelection();
+        stopsBox_->setTitle(tr("Paraderos (más saturados primero)"));
+        return;
+    }
+    const int comboIndex = routeCombo_->findData(routeId);
+    if (comboIndex >= 0) routeCombo_->setCurrentIndex(comboIndex);
+    for (int i = 0; i < routeList_->count(); ++i)
+        if (routeList_->item(i)->data(Qt::UserRole).toString() == routeId)
+            routeList_->setCurrentRow(i);
+    stopsBox_->setTitle(tr("Paraderos de %1").arg(mapBridge_->focusedRouteName()));
+}
+
+void SimulationWidget::filterRoutes(const QString& text) {
+    const QString needle = text.trimmed();
+    for (int i = 0; i < routeList_->count(); ++i) {
+        auto* item = routeList_->item(i);
+        const bool match = needle.isEmpty()
+            || item->data(Qt::UserRole + 1).toString().contains(needle, Qt::CaseInsensitive)
+            || item->data(Qt::UserRole).toString().contains(needle, Qt::CaseInsensitive);
+        item->setHidden(!match);
+    }
+}
+
+void SimulationWidget::updateRouteList(const sit::Snapshot& s) {
+    std::unordered_map<std::string, int> waitingAt;
+    for (const auto& st : s.stops) waitingAt[st.id] = st.waiting;
+    std::unordered_map<std::string, int> buses;
+    for (const auto& v : s.vehicles) ++buses[v.routeId];
+
+    // Demanda por bus: cuanta gente espera en la ruta por cada bus que la atiende.
+    QHash<QString, int> need;
+    for (const auto& r : s.routes) {
+        int waiting = 0;
+        for (const auto& id : r.stopIds) waiting += waitingAt[id];
+        const int n = buses[r.id];
+        const QString id = QString::fromStdString(r.id);
+        need[id] = waiting / std::max(1, n);
+        for (int i = 0; i < routeList_->count(); ++i) {
+            auto* item = routeList_->item(i);
+            if (item->data(Qt::UserRole).toString() != id) continue;
+            const QString busesText = n == 1 ? tr("1 bus") : tr("%1 buses").arg(n);
+            item->setText(tr("%1\n%2 · %3 esperando").arg(item->data(Qt::UserRole + 1).toString(),
+                                                           busesText).arg(waiting));
+        }
+    }
+
+    // Reordenar cada ~2 s (40 snapshots) para que la lista no salte bajo el cursor.
+    if (snapshotCount_++ % 40 != 0) return;
+    const QString current = mapBridge_->focusedRouteId();
+    std::vector<QListWidgetItem*> items;
+    while (routeList_->count() > 0) items.push_back(routeList_->takeItem(0));
+    std::stable_sort(items.begin(), items.end(), [&](QListWidgetItem* a, QListWidgetItem* b) {
+        return need[a->data(Qt::UserRole).toString()] > need[b->data(Qt::UserRole).toString()];
+    });
+    for (auto* item : items) {
+        routeList_->addItem(item);
+        if (item->data(Qt::UserRole).toString() == current) routeList_->setCurrentItem(item);
+    }
 }
 
 void SimulationWidget::onRouteChanged() {
@@ -290,8 +398,13 @@ void SimulationWidget::onSnapshot(const sit::Snapshot& s) {
     abandonedLabel_->setText(QString::number(s.stats.abandoned));
     saturationLabel_->setText(QString("%1 %").arg(s.stats.avgSaturation * 100.0, 0, 'f', 0));
 
-    // Tabla de paraderos: los mas saturados primero (lambda de ordenamiento).
-    std::vector<sit::StopView> stops = s.stops;
+    updateRouteList(s);
+
+    // Tabla de paraderos: los de la ruta elegida (o todos), los mas saturados primero.
+    std::vector<sit::StopView> stops;
+    const QVariantMap focused = mapBridge_->focusedStops();
+    for (const auto& st : s.stops)
+        if (focused.isEmpty() || focused.contains(QString::fromStdString(st.id))) stops.push_back(st);
     std::sort(stops.begin(), stops.end(), [](const sit::StopView& a, const sit::StopView& b) {
         return a.saturation > b.saturation;
     });

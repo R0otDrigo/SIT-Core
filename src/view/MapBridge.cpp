@@ -33,6 +33,19 @@ void MapBridge::setShowGtfs(bool show) {
     emit showGtfsChanged();
 }
 
+void MapBridge::setFocusedRouteId(const QString& routeId) {
+    if (routeId == focusedRouteId_) return;
+    focusedRouteId_ = routeId;
+    focusedRouteName_.clear();
+    focusedStops_.clear();
+    for (const auto& route : lastSnapshot_.routes) {
+        if (QString::fromStdString(route.id) != routeId) continue;
+        focusedRouteName_ = QString::fromStdString(route.name);
+        for (const auto& stopId : route.stopIds) focusedStops_.insert(QString::fromStdString(stopId), true);
+    }
+    emit focusChanged();
+}
+
 void MapBridge::loadGtfs(const QString& dataDir) {
     QStringList candidates;
     if (!dataDir.isEmpty()) candidates << dataDir;

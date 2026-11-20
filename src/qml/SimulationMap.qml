@@ -79,6 +79,8 @@ Item {
                 routeTrunk: model.trunk
                 routeAffected: model.affected
                 routeLabel: model.name
+                focused: mapBridge.focusedRouteId === model.routeId
+                dimmed: mapBridge.focusedRouteId !== "" && !focused
             }
         }
 
@@ -91,6 +93,11 @@ Item {
                 saturation: model.saturation
                 closed: model.closed
                 showLabel: map.zoomLevel >= 15
+                // Sin ruta elegida solo se ven los paraderos que piden atencion (>= 50 % o
+                // cerrados); con ruta elegida, todos los de esa ruta.
+                visible: mapBridge.focusedRouteId === ""
+                         ? (model.closed || model.saturation >= 0.5)
+                         : mapBridge.focusedStops[model.stopId] === true
             }
         }
 
@@ -110,6 +117,8 @@ Item {
                 incomingCall: mapBridge.incomingCallVehicleId === String(model.vehicleId)
                 callName: mapBridge.incomingCallName
                 callStatus: mapBridge.incomingCallStatus
+                opacity: mapBridge.focusedRouteId === "" || mapBridge.focusedRouteId === model.routeId
+                         || showStats ? 1.0 : 0.25
                 onClicked: mapBridge.selectVehicle(String(model.vehicleId))
                 onCallRequested: mapBridge.callRequested(String(model.vehicleId))
                 onCallAnswered: mapBridge.callAnswered(String(model.vehicleId))
@@ -191,39 +200,36 @@ Item {
         }
     }
 
+    // Ruta elegida: chip con su nombre y una forma rapida de volver a ver todas.
     Rectangle {
         anchors.left: parent.left
-        anchors.bottom: parent.bottom
+        anchors.top: eventBanner.bottom
         anchors.margins: 12
-        width: statusColumn.width + 20
-        height: statusColumn.height + 12
+        visible: mapBridge.focusedRouteId !== ""
+        width: focusRow.width + 20
+        height: 36
         radius: 8
         color: root.cardColor
         border.color: root.borderColor
 
-        Column {
-            id: statusColumn
+        Row {
+            id: focusRow
             anchors.centerIn: parent
-            spacing: 2
-
+            spacing: 10
             Text {
-                text: mapBridge.gtfsStatus.length > 0 ? mapBridge.gtfsStatus
-                                                      : qsTr("GTFS no cargado")
-                color: root.mutedColor
-                font.pixelSize: 11
+                anchors.verticalCenter: parent.verticalCenter
+                text: qsTr("Ruta: %1").arg(mapBridge.focusedRouteName)
+                color: root.textColor
+                font.pixelSize: 13
+                font.bold: true
             }
-            Row {
-                spacing: 8
-                Text {
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: qsTr("Mostrar trazados GTFS")
-                    color: root.textColor
-                    font.pixelSize: 12
-                }
-                Switch {
-                    checked: mapBridge.showGtfs
-                    onToggled: mapBridge.showGtfs = checked
-                }
+            MapButton {
+                width: 26
+                height: 26
+                font.pixelSize: 13
+                text: "\u2715"
+                ToolTip.text: qsTr("Ver todas las rutas")
+                onClicked: mapBridge.focusedRouteId = ""
             }
         }
     }

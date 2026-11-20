@@ -14,7 +14,8 @@ public:
           geo_(geo) {}
     virtual ~Stop() = default;
 
-    // Pasajeros nuevos por segundo (depende del tipo de paradero).
+    // Pasajeros nuevos por segundo simulado (1 s = 30 s de reloj). 0.06 ~ 7 personas/hora
+    // fuera de hora punta: la demanda total queda al alcance de la flota disponible.
     virtual double boardingRate() const = 0;
     virtual std::string typeName() const = 0;
 
@@ -27,7 +28,7 @@ public:
 
     int waiting() const { return waiting_; }
     int maxWaiting() const { return maxWaiting_; }
-    double saturation() const;              // 0.0 a 2.0 (el paradero rechaza gente sobre 2x)
+    double saturation() const;              // 0.0 a 1.0 (lleno: los que llegan desisten)
 
     const std::string& id() const { return id_; }
     const std::string& name() const { return name_; }
@@ -52,21 +53,21 @@ private:
 class RegularStop : public Stop {
 public:
     using Stop::Stop;
-    double boardingRate() const override { return 0.4; }
+    double boardingRate() const override { return 0.06; }
     std::string typeName() const override { return "regular"; }
 };
 
 class Terminal : public Stop {
 public:
     using Stop::Stop;
-    double boardingRate() const override { return 1.0; }
+    double boardingRate() const override { return 0.15; }
     std::string typeName() const override { return "terminal"; }
 };
 
 class TransferStation : public Stop {
 public:
     using Stop::Stop;
-    double boardingRate() const override { return 0.75; }
+    double boardingRate() const override { return 0.12; }
     std::string typeName() const override { return "transfer"; }
 };
 

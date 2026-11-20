@@ -23,6 +23,8 @@ distinta capacidad y velocidad.
 
 El administrador puede:
 
+- buscar una ruta por nombre o código y resaltarla en el mapa; las demás se atenúan y solo se ven sus paraderos;
+- ver las rutas ordenadas por gente esperando por bus, para saber a cuál despachar primero;
 - despachar un bus en cualquier ruta o retirar uno vacío;
 - provocar un accidente, una obra vial que vuelve lenta la ruta o una protesta que cierra un paradero;
 - pausar la simulación y cambiar la velocidad entre 1x y 20x;

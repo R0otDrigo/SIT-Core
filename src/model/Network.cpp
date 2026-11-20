@@ -179,7 +179,7 @@ double Network::demandMultiplier() const {
         const double d = h - center;
         return std::exp(-(d * d) / (2.0 * width * width));
     };
-    double m = 1.0 + 1.8 * bump(8.0, 0.9) + 1.8 * bump(18.0, 1.0);   // horas punta
+    double m = 1.0 + 1.5 * bump(8.0, 0.9) + 1.5 * bump(18.0, 1.0);   // horas punta
     if (h < 6.0 || h >= 22.0) m *= 0.4;                               // noche
     return m;
 }

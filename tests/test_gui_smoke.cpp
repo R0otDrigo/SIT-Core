@@ -1,9 +1,11 @@
 // Prueba de humo de controlador + vista (se ejecuta con QT_QPA_PLATFORM=offscreen).
 #include <QApplication>
+#include <QListWidget>
 #include <QQuickWidget>
 #include <QTimer>
 #include "check.h"
 #include "common/Exceptions.h"
+#include "view/MapBridge.h"
 #include "view/SimulationWidget.h"
 
 int main(int argc, char** argv) {
@@ -24,6 +26,25 @@ int main(int argc, char** argv) {
     CHECK(window.mapWidget() != nullptr);
     CHECK(window.mapWidget()->status() == QQuickWidget::Ready);
     CHECK(window.mapWidget()->errors().isEmpty());
+
+    // Rutas: la lista tiene las 9; buscar oculta las que no coinciden.
+    QListWidget* routes = window.routeList();
+    CHECK(routes->count() == 9);
+    window.findChild<QLineEdit*>("routeSearch")->setText("yumina");
+    int visible = 0;
+    for (int i = 0; i < routes->count(); ++i) visible += routes->item(i)->isHidden() ? 0 : 1;
+    CHECK(visible == 1);
+
+    // Elegir una ruta la resalta en el mapa y filtra la tabla a sus paraderos.
+    window.focusRoute("21240658");
+    CHECK(window.mapBridge()->focusedRouteId() == "21240658");
+    const int routeStops = window.mapBridge()->focusedStops().size();
+    CHECK(routeStops > 1 && routeStops < 288);
+    QTimer::singleShot(200, &app, &QApplication::quit);
+    app.exec();
+    CHECK(window.stopsTable()->rowCount() == routeStops);
+    window.focusRoute(QString());
+    CHECK(window.mapBridge()->focusedStops().isEmpty());
 
     // Un error del modelo llega a la vista como senal, sin romper nada.
     int errors = 0;
