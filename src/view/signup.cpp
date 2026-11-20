@@ -29,7 +29,6 @@ void SignUp::onSignUpClicked() {
 
   ui->info->setText(tr("Registrando..."));
   ui->confirmButton->setEnabled(false);
-  qDebug() << email << password << role << username;
   m_authManager->signUp(email, password, role, username);
 }
 

@@ -156,7 +156,9 @@ void MapBridge::selectVehicle(const QString& vehicleId) {
     QString routeLabel = QString::fromStdString(vehicle->routeId);
     for (const auto& route : lastSnapshot_.routes) {
         if (route.id == vehicle->routeId) {
-            routeLabel = QString::fromStdString(route.name);
+            routeLabel = QStringLiteral("%1 - %2")
+                             .arg(QString::fromStdString(route.id),
+                                  QString::fromStdString(route.name));
             break;
         }
     }
@@ -169,6 +171,9 @@ void MapBridge::selectVehicle(const QString& vehicleId) {
                                 .arg(vehicle->dwelling ? QStringLiteral("en paradero")
                                                        : QStringLiteral("en ruta"));
     emit selectionChanged();
+    emit busSelected(vehicle->id, QString::fromStdString(vehicle->type), routeLabel,
+                     vehicle->passengers, vehicle->capacity, vehicle->dwelling,
+                     QString::fromStdString(vehicle->nextStopName));
 }
 
 void MapBridge::clearSelection() {

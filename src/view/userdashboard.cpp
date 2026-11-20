@@ -59,4 +59,6 @@ void UserDashboard::initializeSession(const QString &userId, const QString &idTo
     }
 }
 
+QString UserDashboard::dashboardTitle() const { return tr("User Dashboard"); }
+
 QString UserDashboard::welcomeMessage() const { return tr("Bienvenido Usuario"); }

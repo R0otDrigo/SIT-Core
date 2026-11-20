@@ -82,11 +82,6 @@ void FirebaseAuthManager::onSignUpReplyFinished()
     m_idToken = data["idToken"].toString();
     m_uid = data["localId"].toString();
 
-    qDebug() << "✅ onSignUpReplyFinished se ejecutó";  // ← si NO ves esto, es deleteLater
-    qDebug() << "Error:" << reply->error() << reply->errorString();
-    qDebug() << "Body:" << reply->readAll();
-
-
     // Ahora vamos a crear un 'documento' de firestore para almacenar los usuarios con sus respectivos roles
     createFirestoreUser();
 }
