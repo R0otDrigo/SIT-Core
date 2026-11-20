@@ -11,6 +11,16 @@
 #include <QUrlQuery>
 #include <cmath>
 
+// UnitRegistry.cpp
+UnitRegistry &UnitRegistry::instance() {
+  static UnitRegistry registry;
+  return registry;
+}
+
+// Ejemplo de uso para este nuevo QObject :
+// UnitRegistry::instance().loadUnits(); e implementar de manera distinta (Una
+// vez para compilación global de sessiones sincronizada.
+
 UnitRegistry::UnitRegistry(QObject *parent)
     : QObject(parent), network_(new QNetworkAccessManager(this)) {
   readConfig();
@@ -159,9 +169,9 @@ void UnitRegistry::registerUnit(const QString &unitId, const QString &driverUid,
     return;
 
   QUrlQuery query;
-  for (const QString &field : {QStringLiteral("pos_x"), QStringLiteral("pos_y"),
-                               QStringLiteral("driver"),
-                               QStringLiteral("status")})
+  for (const QString &field :
+       {QStringLiteral("pos_x"), QStringLiteral("pos_y"),
+        QStringLiteral("driver"), QStringLiteral("status")})
     query.addQueryItem(QStringLiteral("updateMask.fieldPaths"), field);
 
   QNetworkRequest request =
