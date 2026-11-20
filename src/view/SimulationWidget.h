@@ -1,5 +1,7 @@
 #pragma once
+#include <QCheckBox>
 #include <QComboBox>
+#include <QLineEdit>
 #include <QGroupBox>
 #include <QLabel>
 #include <QListWidget>
@@ -25,6 +27,11 @@ public:
     SimulationController* controller() const { return controller_; }
     QTableWidget* stopsTable() const { return stopsTable_; }
     QQuickWidget* mapWidget() const { return map_; }
+    QListWidget* routeList() const { return routeList_; }
+    MapBridge* mapBridge() const { return mapBridge_; }
+
+    // Resalta una ruta en el mapa y la deja elegida para flota y eventos ("" = todas).
+    void focusRoute(const QString& routeId);
 
     void showIncomingCall(const QString& vehicleId, const QString& name,
                           const QString& status = QString());
@@ -45,6 +52,8 @@ private:
                      int passengers, int capacity, bool dwelling, const QString& nextStop);
     void clearBusInfo();
     void addLog(const QString& line);
+    void updateRouteList(const sit::Snapshot& snapshot);
+    void filterRoutes(const QString& text);
 
     SimulationController* controller_{};
     MapBridge* mapBridge_{};
@@ -72,6 +81,11 @@ private:
     QComboBox* vehicleTypeCombo_{};
     QComboBox* eventCombo_{};
     QTableWidget* stopsTable_{};
+    QGroupBox* stopsBox_{};
+    QLineEdit* routeSearch_{};
+    QListWidget* routeList_{};
+    QCheckBox* gtfsCheck_{};
+    int snapshotCount_{0};
     QListWidget* logList_{};
 
     bool routesLoaded_{false};

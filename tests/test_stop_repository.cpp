@@ -15,9 +15,10 @@ int main() {
     CHECK(*a < *b);
     CHECK(a->takeWaiting(50) == 20);
 
-    // Un paradero rechaza gente sobre 2x su capacidad.
-    CHECK(b->addWaiting(500) == 500 - 110);
-    CHECK(b->waiting() == 200);
+    // Un paradero lleno rechaza a los que llegan: la saturacion no pasa de 100 %.
+    CHECK(b->addWaiting(500) == 500 - 10);
+    CHECK(b->waiting() == 100);
+    CHECK(b->saturation() == 1.0);
 
     Repository<Stop> repo;
     repo.add(a);

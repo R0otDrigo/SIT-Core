@@ -68,6 +68,18 @@ int main() {
         CHECK(received == after);                          // ya no hay notificaciones
     }
 
+    // --- Demanda realista: con la flota inicial la hora punta de la manana (06:00 -> 09:00)
+    //     no desborda la red, y ningun paradero pasa de su capacidad ---
+    {
+        SimulationEngine engine(loadNet());
+        for (int i = 0; i < 360 * 20; ++i) engine.stepOnce(0.05);     // 360 s simulados = 3 h
+        auto s = engine.snapshot();
+        CHECK(s.clock == "09:00");
+        CHECK(s.stats.avgSaturation < 0.6);
+        CHECK(s.stats.abandoned < 100);
+        for (const auto& st : s.stops) CHECK(st.saturation <= 1.0);
+    }
+
     // --- Strategy: el despacho manual nunca decide nada por su cuenta ---
     {
         auto net = loadNet();

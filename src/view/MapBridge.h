@@ -2,6 +2,7 @@
 #include <QAbstractListModel>
 #include <QObject>
 #include <QString>
+#include <QVariantMap>
 #include "model/Snapshot.h"
 
 class RouteListModel;
@@ -28,6 +29,10 @@ class MapBridge : public QObject {
     Q_PROPERTY(QString eventText READ eventText NOTIFY eventTextChanged)
     Q_PROPERTY(bool showGtfs READ showGtfs WRITE setShowGtfs NOTIFY showGtfsChanged)
     Q_PROPERTY(QString gtfsStatus READ gtfsStatus NOTIFY gtfsStatusChanged)
+    // Ruta resaltada en el mapa ("" = todas). focusedStops = {stopId: true} de esa ruta.
+    Q_PROPERTY(QString focusedRouteId READ focusedRouteId WRITE setFocusedRouteId NOTIFY focusChanged)
+    Q_PROPERTY(QString focusedRouteName READ focusedRouteName NOTIFY focusChanged)
+    Q_PROPERTY(QVariantMap focusedStops READ focusedStops NOTIFY focusChanged)
     Q_PROPERTY(QString selectedVehicleId READ selectedVehicleId NOTIFY selectionChanged)
     Q_PROPERTY(QString selectedVehicleStats READ selectedVehicleStats NOTIFY selectionChanged)
     Q_PROPERTY(QString incomingCallVehicleId READ incomingCallVehicleId NOTIFY callChanged)
@@ -56,6 +61,9 @@ public:
     QString eventText() const { return eventText_; }
     bool showGtfs() const { return showGtfs_; }
     QString gtfsStatus() const { return gtfsStatus_; }
+    QString focusedRouteId() const { return focusedRouteId_; }
+    QString focusedRouteName() const { return focusedRouteName_; }
+    QVariantMap focusedStops() const { return focusedStops_; }
     QString selectedVehicleId() const { return selectedVehicleId_; }
     QString selectedVehicleStats() const { return selectedVehicleStats_; }
     QString incomingCallVehicleId() const { return incomingCallVehicleId_; }
@@ -64,6 +72,7 @@ public:
 
 public slots:
     void setShowGtfs(bool show);
+    void setFocusedRouteId(const QString& routeId);
     void selectVehicle(const QString& vehicleId);
     void clearSelection();
     void setIncomingCall(const QString& vehicleId, const QString& name, const QString& status);
@@ -74,6 +83,7 @@ signals:
     void eventTextChanged();
     void showGtfsChanged();
     void gtfsStatusChanged();
+    void focusChanged();
     void selectionChanged();
     void callChanged();
     void callAnswered(QString vehicleId);
@@ -99,8 +109,11 @@ private:
     double maxLongitude_{-71.5369};
     double initialZoom_{12.0};
     QString eventText_;
-    bool showGtfs_{true};
+    bool showGtfs_{false};      // los 227 trazados GTFS saturan el mapa: se activan a pedido
     QString gtfsStatus_;
+    QString focusedRouteId_;
+    QString focusedRouteName_;
+    QVariantMap focusedStops_;
     sit::Snapshot lastSnapshot_;
     QString selectedVehicleId_;
     QString selectedVehicleStats_;

@@ -6,7 +6,7 @@ namespace sit {
 
 int Stop::addWaiting(int n) {
     n = std::max(0, n);
-    const int room = std::max(0, maxWaiting_ * 2 - waiting_);
+    const int room = std::max(0, maxWaiting_ - waiting_);
     const int accepted = std::min(n, room);
     waiting_ += accepted;
     return n - accepted;
