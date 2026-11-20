@@ -41,7 +41,7 @@ void UserDashboard::initializeSession(const QString &userId, const QString &idTo
     if (unitRegistry_ && !idToken.isEmpty())
         unitRegistry_->configure(unitRegistry_->projectId(), idToken);
     if (userWidget_) return;
-    auto *layout = qobject_cast<QVBoxLayout *>(this->layout());
+    auto *layout = contentLayout();
     if (!layout) return;
 
     QString path = QDir(QCoreApplication::applicationDirPath()).filePath("data/network.csv");
@@ -59,6 +59,6 @@ void UserDashboard::initializeSession(const QString &userId, const QString &idTo
     }
 }
 
-QString UserDashboard::dashboardTitle() const { return tr("User Dashboard"); }
+QString UserDashboard::dashboardTitle() const { return tr("Panel de usuario"); }
 
 QString UserDashboard::welcomeMessage() const { return tr("Bienvenido Usuario"); }

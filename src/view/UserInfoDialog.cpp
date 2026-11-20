@@ -14,13 +14,15 @@ UserInfoDialog::UserInfoDialog(Mode mode, UserBridge* bridge, QWidget* parent)
     switch (mode) {
     case Mode::MoreInfo:
         modeName = QStringLiteral("info");
+        height = 430;
         break;
     case Mode::Call:
         modeName = QStringLiteral("call");
-        height = 230;
+        height = 280;
         break;
     case Mode::VehicleStatus:
         modeName = QStringLiteral("vehicle");
+        height = 370;
         break;
     }
 
@@ -28,7 +30,7 @@ UserInfoDialog::UserInfoDialog(Mode mode, UserBridge* bridge, QWidget* parent)
     setWindowTitle(modeName == QStringLiteral("info")
                        ? tr("Más información")
                        : (modeName == QStringLiteral("call") ? tr("Llamar")
-                                                             : tr("Vehicle status")));
+                                                             : tr("Estado del vehículo")));
 
     auto* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
