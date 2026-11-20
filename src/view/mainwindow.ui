@@ -9,18 +9,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>700</width>
-    <height>714</height>
+    <width>1280</width>
+    <height>800</height>
    </rect>
   </property>
-  <property name="sizePolicy">
-   <sizepolicy hsizetype="Ignored" vsizetype="Minimum">
-    <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
-   </sizepolicy>
-  </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>SIT-Core</string>
   </property>
   <widget class="QWidget" name="centralwidget"/>
   <widget class="QMenuBar" name="menubar">
@@ -37,20 +31,16 @@
      <enum>Qt::FocusPolicy::ClickFocus</enum>
     </property>
     <property name="title">
-     <string>Language</string>
+     <string>Idioma</string>
     </property>
-    <addaction name="separator"/>
     <addaction name="actionEspa_ol"/>
     <addaction name="actionIngles"/>
     <addaction name="actionChino"/>
     <addaction name="actionArabe"/>
-    <addaction name="separator"/>
-    <addaction name="separator"/>
-    <addaction name="separator"/>
    </widget>
     <widget class="QMenu" name="menuLogout">
      <property name="title">
-      <string>User</string>
+      <string>Cuenta</string>
      </property>
      <addaction name="actionMoreInfo"/>
      <addaction name="actionCall"/>
@@ -81,7 +71,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Ingles</string>
+    <string>Inglés</string>
    </property>
    <property name="menuRole">
     <enum>QAction::MenuRole::TextHeuristicRole</enum>
@@ -100,7 +90,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Arabe</string>
+    <string>Árabe</string>
    </property>
   </action>
   <action name="actionMoreInfo">
@@ -124,15 +114,12 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Vehicle status</string>
+    <string>Estado del vehículo</string>
    </property>
   </action>
   <action name="actionLogout">
-   <property name="icon">
-    <iconset theme="QIcon::ThemeIcon::EditClear"/>
-   </property>
    <property name="text">
-    <string>Logout</string>
+    <string>Cerrar sesión</string>
    </property>
   </action>
  </widget>

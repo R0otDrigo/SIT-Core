@@ -7,5 +7,6 @@
         <file>user.qml</file>
         <file>UserInfoDialog.qml</file>
         <file>meeting.qml</file>
+        <file>Theme.js</file>
     </qresource>
 </RCC>

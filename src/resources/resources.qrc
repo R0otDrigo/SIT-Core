@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/styles">
+        <file alias="style.qss">style.qss</file>
+        <file alias="chevron-down.png">chevron-down.png</file>
+    </qresource>
+</RCC>

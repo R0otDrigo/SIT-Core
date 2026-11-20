@@ -36,6 +36,14 @@ MainWindow::MainWindow(QWidget *parent)
       guestPage(new GuestDashboard(this)), translator(new QTranslator(this)),
       broadcast(new UserBroadcast(this)), unitRegistry(new UnitRegistry(this)) {
   ui->setupUi(this);
+  setWindowTitle(tr("SIT-Core"));
+  resize(1280, 800);
+  setMinimumSize(1024, 680);
+
+  connect(adminPage, &Dashboard::logoutRequested, this, &MainWindow::onLogoutRequested);
+  connect(userPage, &Dashboard::logoutRequested, this, &MainWindow::onLogoutRequested);
+  connect(guestPage, &Dashboard::logoutRequested, this, &MainWindow::onLogoutRequested);
+
   adminPage->setBroadcast(broadcast);
   userPage->setBroadcast(broadcast);
   adminPage->setUnitRegistry(unitRegistry);
@@ -147,6 +155,8 @@ void MainWindow::onLoginSuccessful(const QString &userId,
           &MainWindow::onIncomingCall);
 
   if (isAdminRole(r)) {
+    currentUserName = tr("Administrador");
+    adminPage->setSessionInfo(currentUserName, r);
     adminPage->initialize(idToken);
     connect(adminPage, &AdminDashboard::callAnswered, this,
             &MainWindow::onCallAnswered);
@@ -154,20 +164,27 @@ void MainWindow::onLoginSuccessful(const QString &userId,
             &MainWindow::onAdminCallRequested);
     showPage(kAdminPage);
   } else if (isGuestRole(r)) {
+    currentUserName = tr("Invitado");
+    guestPage->setSessionInfo(currentUserName, r);
     showPage(kGuestPage);
   } else {
     userPage->initializeSession(userId, idToken);
     if (UserWidget *widget = userPage->userWidget()) {
       currentVehicleId = widget->bridge()->vehicleId();
+      currentUserName = widget->bridge()->displayName();
+      userPage->setSessionInfo(currentUserName, r);
       connect(widget->bridge(), &UserBridge::vehicleChanged, this, [this] {
         if (UserWidget *active = userPage->userWidget())
           currentVehicleId = active->bridge()->vehicleId();
         emit onUpdateVehicle();
       });
+    } else {
+      userPage->setSessionInfo(tr("Usuario"), r);
     }
     showPage(kUserPage);
   }
   setUserActionsEnabled(userFeatures);
+  statusBar()->showMessage(tr("Sesión iniciada como %1").arg(currentUserName));
 
   // Mostrar el menú "User" con la acción de Logout una vez autenticado
   ui->menuLogout->menuAction()->setVisible(true);
@@ -241,7 +258,10 @@ void MainWindow::onLogoutRequested() {
   }
   currentUserId.clear();
   currentVehicleId.clear();
+  currentUserName.clear();
+  loginPage->reset();
   setUserActionsEnabled(false);
+  statusBar()->clearMessage();
   showPage(kLoginPage);
   ui->menuLogout->menuAction()->setVisible(false);
 }

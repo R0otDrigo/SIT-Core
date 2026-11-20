@@ -1,7 +1,7 @@
 #include <QApplication>
 #include <QSettings>
-#include <QDebug>
 
+#include "view/apptheme.h"
 #include "view/mainwindow.h"
 
 int main(int argc, char *argv[]) {
@@ -12,10 +12,11 @@ int main(int argc, char *argv[]) {
     QCoreApplication::setOrganizationName("TecnologiaObjetos");
     QCoreApplication::setApplicationName("appTecnologiaObjetos");
 
+    applyAppTheme(a);
+
     // Credenciales de Firebase: config.ini junto al ejecutable (no se sube a git).
     QSettings config(QCoreApplication::applicationDirPath() + "/config.ini", QSettings::IniFormat);
 
-    qDebug() << QCoreApplication::applicationDirPath();
     QString apiKey = config.value("FIREBASE_API_KEY").toString();
     QString projectId = config.value("FIREBASE_PROJECT_ID").toString();
 

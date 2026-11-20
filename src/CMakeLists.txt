@@ -18,7 +18,7 @@ if(Qt6_FOUND AND SIT_UI_SOURCES AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
   set(CMAKE_AUTOMOC ON)
   set(CMAKE_AUTOUIC ON)
   set(CMAKE_AUTORCC ON)
-  add_library(sit_ui STATIC ${SIT_UI_SOURCES} qml/qml.qrc)
+  add_library(sit_ui STATIC ${SIT_UI_SOURCES} qml/qml.qrc resources/resources.qrc)
   target_include_directories(sit_ui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
   target_link_libraries(sit_ui PUBLIC sit_model Qt6::Widgets Qt6::Network Qt6::Quick
                                         Qt6::QuickWidgets Qt6::Qml Qt6::Positioning Qt6::Location)
