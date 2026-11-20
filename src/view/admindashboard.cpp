@@ -24,19 +24,30 @@ AdminDashboard::AdminDashboard(QWidget *parent)
 {
     retranslate();
 
-    auto *layout = qobject_cast<QVBoxLayout *>(this->layout());
+    auto *layout = contentLayout();
     messagesBox_ = new QGroupBox(tr("Mensajes para el usuario"), this);
+    messagesBox_->setObjectName("messagesBox");
+    messagesBox_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
     auto *grid = new QGridLayout(messagesBox_);
+    grid->setHorizontalSpacing(8);
+    grid->setVerticalSpacing(8);
     antecedentesEdit_ = new QLineEdit(messagesBox_);
+    antecedentesEdit_->setPlaceholderText(tr("Sin antecedentes penales"));
     eventoEdit_ = new QLineEdit(messagesBox_);
+    eventoEdit_->setPlaceholderText(tr("Reunión con el administrador"));
     auto *clearButton = new QPushButton(tr("Limpiar"), messagesBox_);
     auto *sendButton = new QPushButton(tr("Enviar"), messagesBox_);
+    sendButton->setObjectName("primaryButton");
+    sendButton->setCursor(Qt::PointingHandCursor);
+    clearButton->setCursor(Qt::PointingHandCursor);
     grid->addWidget(new QLabel(tr("Antecedentes:"), messagesBox_), 0, 0);
-    grid->addWidget(antecedentesEdit_, 0, 1);
+    grid->addWidget(antecedentesEdit_, 0, 1, 1, 3);
     grid->addWidget(new QLabel(tr("Evento:"), messagesBox_), 1, 0);
-    grid->addWidget(eventoEdit_, 1, 1);
-    grid->addWidget(clearButton, 2, 0);
-    grid->addWidget(sendButton, 2, 1);
+    grid->addWidget(eventoEdit_, 1, 1, 1, 3);
+    grid->addWidget(clearButton, 0, 4);
+    grid->addWidget(sendButton, 1, 4);
+    grid->setColumnStretch(1, 1);
+    grid->setColumnStretch(2, 1);
     if (layout) layout->addWidget(messagesBox_);
     messagesBox_->setEnabled(false);
 
@@ -94,7 +105,7 @@ void AdminDashboard::initialize(const QString &idToken)
         unitRegistry_->loadUnits();
     }
     if (simulation_) return;
-    auto *layout = qobject_cast<QVBoxLayout *>(this->layout());
+    auto *layout = contentLayout();
     if (!layout) return;
 
     QString path = QDir(QCoreApplication::applicationDirPath()).filePath("data/network.csv");
@@ -118,10 +129,10 @@ void AdminDashboard::resetSession()
 
 QString AdminDashboard::dashboardTitle() const
 {
-    return tr("Admin Dashboard");
+    return tr("Panel de administración");
 }
 
 QString AdminDashboard::welcomeMessage() const
 {
-    return tr("Welcome Administrator");
+    return tr("Bienvenido, administrador");
 }
